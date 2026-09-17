@@ -181,8 +181,11 @@ Mecânica, para não deixar ambiguidade na implementação:
   antecedem a semana corrente. O corte é por `weekKey`, não por data absoluta, para que
   uma semana nunca fique dividida entre documento e arquivo.
 - **Quando roda:** logo depois de uma leitura bem-sucedida do documento do aluno, no
-  mesmo aparelho que já está com ele aberto — tanto do aluno quanto do personal. Roda no
-  máximo uma vez por sessão e por aluno, e nunca durante um salvamento.
+  aparelho **do próprio aluno**, no máximo uma vez por sessão, e nunca durante um
+  salvamento. Não roda no aparelho do personal: ele assina todos os alunos de uma vez, e
+  arquivar todos no carregamento dispararia uma rajada de escritas sem necessidade — cada
+  aluno abre o próprio app com frequência muito maior do que a exigida para manter o
+  documento abaixo do limite.
 - **Como roda:** escrita do documento de arquivo primeiro, remoção das entradas do array
   depois, em operações separadas. Se a segunda falhar, o pior caso é entrada duplicada
   entre arquivo e array, que a leitura reconcilia por `setId` + `dateKey`. A ordem
