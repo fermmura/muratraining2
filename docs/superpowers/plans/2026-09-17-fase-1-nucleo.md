@@ -790,14 +790,18 @@ O cálculo puro que desarma o estouro de 1MB. Só decide o que fica e o que sai;
 - Produces:
   - `ARCHIVE_AFTER_WEEKS: number` (26)
   - `splitHistoryForArchive(history, currentWeekKey): { keep: HistoryEntry[]; archive: Map<string, HistoryEntry[]> }`
-  - `mergeArchivedHistory(inDoc, archived): HistoryEntry[]`
+
+A leitura reconciliada do arquivo (juntar arquivo + documento para os gráficos) é
+da fase 2, junto com a tela de progressão que a consome. Na fase 1 ninguém lê
+histórico arquivado: `buildLastDoneIndex` procura o treino MAIS RECENTE, que por
+definição está dentro das 26 semanas que ficam no documento.
 
 - [ ] **Step 1: Escrever os testes que falham**
 
 ```ts
 // src/domain/archive.test.ts
 import { describe, it, expect } from "vitest";
-import { splitHistoryForArchive, mergeArchivedHistory, ARCHIVE_AFTER_WEEKS } from "./archive";
+import { splitHistoryForArchive, ARCHIVE_AFTER_WEEKS } from "./archive";
 import { addWeeks } from "./week";
 import type { HistoryEntry } from "@/data/schema";
 
@@ -861,33 +865,6 @@ describe("splitHistoryForArchive", () => {
     expect(archive.size).toBe(0);
   });
 });
-
-describe("mergeArchivedHistory", () => {
-  it("junta arquivo e documento", () => {
-    const a = entry("2025-01-06", "s1");
-    const b = entry(CURRENT, "s2");
-    expect(mergeArchivedHistory([b], [a])).toHaveLength(2);
-  });
-
-  it("reconcilia duplicata deixada por arquivamento interrompido", () => {
-    // o arquivo grava primeiro e o array é limpo depois; se a limpeza falhar,
-    // a mesma entrada aparece nos dois lugares
-    const dup = entry("2025-01-06", "s1");
-    expect(mergeArchivedHistory([dup], [dup])).toHaveLength(1);
-  });
-
-  it("distingue entradas da mesma série em dias diferentes", () => {
-    const d1 = entry("2025-01-06", "s1", "2025-01-06");
-    const d2 = entry("2025-01-06", "s1", "2025-01-08");
-    expect(mergeArchivedHistory([d1], [d2])).toHaveLength(2);
-  });
-
-  it("ordena por data crescente", () => {
-    const velho = entry("2025-01-06", "s1");
-    const novo = entry(CURRENT, "s2");
-    expect(mergeArchivedHistory([novo], [velho])[0].dateKey).toBe("2025-01-06");
-  });
-});
 ```
 
 - [ ] **Step 2: Rodar e confirmar que falha**
@@ -937,21 +914,6 @@ export function splitHistoryForArchive(
   return { keep, archive };
 }
 
-/** Identidade de uma entrada: a mesma série, no mesmo dia, é a mesma entrada. */
-function entryKey(h: HistoryEntry): string {
-  return `${h.setId}|${h.dateKey}`;
-}
-
-export function mergeArchivedHistory(
-  inDoc: HistoryEntry[],
-  archived: HistoryEntry[],
-): HistoryEntry[] {
-  const byKey = new Map<string, HistoryEntry>();
-  for (const h of archived) byKey.set(entryKey(h), h);
-  // o documento é a fonte mais recente e vence em caso de divergência
-  for (const h of inDoc) byKey.set(entryKey(h), h);
-  return [...byKey.values()].sort((a, b) => a.dateKey.localeCompare(b.dateKey));
-}
 ```
 
 - [ ] **Step 4: Rodar e confirmar que passa**
@@ -960,7 +922,7 @@ export function mergeArchivedHistory(
 npm test
 ```
 
-Esperado: PASS, 34 testes.
+Esperado: PASS, 30 testes.
 
 - [ ] **Step 5: Commit**
 
@@ -1191,7 +1153,7 @@ export function planPromotion(
 npm test
 ```
 
-Esperado: PASS, 46 testes.
+Esperado: PASS, 42 testes.
 
 - [ ] **Step 5: Commit**
 
@@ -1217,7 +1179,7 @@ Primeira tarefa que fala com a rede. Isola o SDK para que o resto do app não im
   - `subscribeToClient(clientId, onChange, onError): () => void`
   - `subscribeToAllClients(onChange, onError): () => void`
   - `saveClient(id, patch: Partial<Client>): Promise<void>`
-  - `findClientByEmail(email): Promise<Client | null>`
+  - `createClient(clientId: string, data: NewClient): Promise<void>` com `NewClient = Omit<Client, "id">`
 
 - [ ] **Step 1: Mover a configuração do Firebase para variáveis de ambiente**
 
@@ -1279,13 +1241,14 @@ export const db = initializeFirestore(app, {
 - [ ] **Step 4: Criar `src/data/client-repo.ts`**
 
 ```ts
-import {
-  collection, doc, getDocs, onSnapshot, query, updateDoc, where,
-} from "firebase/firestore";
+import { collection, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 import type { Client } from "./schema";
 
 const CLIENTS = "clients";
+
+/** Ficha nova: o id do documento é o UID do Auth, e não um campo de dentro dela. */
+export type NewClient = Omit<Client, "id">;
 
 /** O campo `password` existe em documentos antigos do 1.0 e é descartado na leitura. */
 function toClient(id: string, data: Record<string, unknown>): Client {
@@ -1326,12 +1289,8 @@ export async function saveClient(id: string, patch: Partial<Client>): Promise<vo
   await updateDoc(doc(db, CLIENTS, id), fields);
 }
 
-export async function findClientByEmail(email: string): Promise<Client | null> {
-  const snap = await getDocs(
-    query(collection(db, CLIENTS), where("email", "==", email.toLowerCase())),
-  );
-  const first = snap.docs[0];
-  return first ? toClient(first.id, first.data()) : null;
+export async function createClient(clientId: string, data: NewClient): Promise<void> {
+  await setDoc(doc(db, CLIENTS, clientId), data);
 }
 ```
 
@@ -1360,20 +1319,18 @@ Aplica o corte da Task 5 contra o banco. A ordem das escritas importa e está ex
 - Create: `src/data/history-archive.ts`
 
 **Interfaces:**
-- Consumes: `splitHistoryForArchive`, `mergeArchivedHistory` (Task 5); `weekKeyOf`, `todayKey` (Task 2); `saveClient` (Task 7).
-- Produces:
-  - `archiveOldHistory(client): Promise<void>`
-  - `loadFullHistory(clientId, inDocHistory): Promise<HistoryEntry[]>`
+- Consumes: `splitHistoryForArchive` (Task 5); `weekKeyOf`, `todayKey` (Task 2); `saveClient` (Task 7).
+- Produces: `archiveOldHistory(client): Promise<void>`
 
 - [ ] **Step 1: Criar `src/data/history-archive.ts`**
 
 ```ts
-import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
-import { splitHistoryForArchive, mergeArchivedHistory } from "@/domain/archive";
+import { splitHistoryForArchive } from "@/domain/archive";
 import { todayKey, weekKeyOf } from "@/domain/week";
 import { saveClient } from "./client-repo";
-import type { Client, HistoryArchiveDoc, HistoryEntry } from "./schema";
+import type { Client, HistoryArchiveDoc } from "./schema";
 
 const ARCHIVE = "historyArchive";
 
@@ -1409,16 +1366,11 @@ export async function archiveOldHistory(client: Client): Promise<void> {
     archivedThisSession.delete(client.id);
   }
 }
-
-export async function loadFullHistory(
-  clientId: string,
-  inDocHistory: HistoryEntry[],
-): Promise<HistoryEntry[]> {
-  const snap = await getDocs(collection(db, "clients", clientId, ARCHIVE));
-  const archived = snap.docs.flatMap((d) => (d.data() as HistoryArchiveDoc).entries ?? []);
-  return mergeArchivedHistory(inDocHistory, archived);
-}
 ```
+
+A leitura do arquivo não entra aqui: na fase 1 nada lê histórico arquivado, e
+escrever um leitor sem consumidor seria código não exercitado. Ele nasce na fase
+2, junto com a tela de progressão que o usa.
 
 - [ ] **Step 2: Verificar que compila**
 
@@ -1631,7 +1583,7 @@ export function translateAuthError(code: string): string {
 npm test
 ```
 
-Esperado: PASS, 52 testes.
+Esperado: PASS, 48 testes.
 
 - [ ] **Step 5: Implementar `src/auth/session.ts`**
 
@@ -1876,7 +1828,7 @@ export function resetState(): void {
 npm test
 ```
 
-Esperado: PASS, 58 testes.
+Esperado: PASS, 54 testes.
 
 - [ ] **Step 5: Commit**
 
@@ -2118,7 +2070,7 @@ describe("formatElapsed", () => {
 npm test
 ```
 
-Esperado: PASS, 64 testes.
+Esperado: PASS, 60 testes.
 
 - [ ] **Step 7: Criar `src/ui/views/gate.ts`**
 
@@ -2339,7 +2291,7 @@ Este módulo liga a interface aos dados. Ele existe para que as views permaneça
 ```ts
 import { html, type TemplateResult } from "lit-html";
 import { getState, setState } from "./state";
-import { saveClient } from "@/data/client-repo";
+import { saveClient, createClient, type NewClient } from "@/data/client-repo";
 import { applySetFieldChange } from "@/domain/history";
 import { uid } from "@/data/id";
 import { signIn, signOutNow, sendPasswordSetup } from "@/auth/session";
@@ -2390,14 +2342,13 @@ export const trainer = {
   onResendSetup: (email: string) => void sendPasswordSetup(email),
   onInvite: async (name: string, email: string) => {
     try {
+      // a conta nasce primeiro: o id do documento é o UID do Auth
       const studentUid = await createStudentAccount(email);
-      const { setDoc, doc } = await import("firebase/firestore");
-      const { db } = await import("@/firebase");
-      const novo: Omit<Client, "id"> = {
+      const novo: NewClient = {
         name, email: email.toLowerCase(), goal: "",
         createdAt: Date.now(), days: [], history: [], weekPlans: [],
       };
-      await setDoc(doc(db, "clients", studentUid), novo);
+      await createClient(studentUid, novo);
     } catch (e) {
       setState({ error: translateAuthError(code(e)) });
     }
@@ -2601,7 +2552,7 @@ Este é o comportamento que o 1.0 não conseguia entregar sem os helpers `commit
 npm test && npm run build
 ```
 
-Esperado: 64 testes passando, build limpo.
+Esperado: 60 testes passando, build limpo.
 
 - [ ] **Step 15: Commit**
 
@@ -2839,7 +2790,7 @@ git push
 
 A fase 1 está pronta quando tudo abaixo for verdade:
 
-- [ ] `npm test` passa com 64 testes.
+- [ ] `npm test` passa com 60 testes.
 - [ ] `npm run build` passa sem erro de TypeScript.
 - [ ] `grep -rn "localStorage\|sessionStorage" src/` não retorna nada.
 - [ ] Nenhum documento novo em `clients/` tem campo `password`.

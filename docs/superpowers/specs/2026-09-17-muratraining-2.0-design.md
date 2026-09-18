@@ -188,8 +188,11 @@ Mecânica, para não deixar ambiguidade na implementação:
   documento abaixo do limite.
 - **Como roda:** escrita do documento de arquivo primeiro, remoção das entradas do array
   depois, em operações separadas. Se a segunda falhar, o pior caso é entrada duplicada
-  entre arquivo e array, que a leitura reconcilia por `setId` + `dateKey`. A ordem
-  inversa poderia perder histórico.
+  entre arquivo e array — nunca entrada perdida, que é o que a ordem inversa arriscaria.
+  A leitura que junta arquivo e documento reconcilia a duplicata por `setId` + `dateKey`,
+  e nasce na fase 2 junto com a tela de progressão, o primeiro lugar que lê histórico
+  arquivado. Na fase 1 a duplicata é inofensiva: quem lê histórico é
+  `buildLastDoneIndex`, que procura a entrada mais recente e portanto ignora as antigas.
 - **Permissão:** como o arquivamento roda no aparelho do aluno, as regras precisam
   permitir que o dono escreva na própria subcoleção `historyArchive` (ver abaixo).
 
