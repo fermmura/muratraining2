@@ -45,6 +45,11 @@ export function applySetFieldChange(
     ?.exercises.find((e) => e.id === exId)
     ?.sets.find((s) => s.id === setId);
 
+  // Sem a série não há o que registrar: gravar aqui produziria uma entrada com
+  // exName vazio e setIndex 0, lixo que vai para o documento do aluno. Acontece
+  // quando o treinador apaga um exercício enquanto o aluno digita nele.
+  if (!set) return { days, history: previous };
+
   // Uma série editada várias vezes no mesmo dia deixa UMA entrada, não uma por tecla.
   const history = previous.filter((h) => !(h.setId === setId && h.dateKey === dateKey));
   history.push({

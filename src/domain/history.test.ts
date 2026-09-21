@@ -87,6 +87,28 @@ describe("applySetFieldChange", () => {
     const { history } = applySetFieldChange(c, "d1", "e1", "s1", "repsDone", "9");
     expect(history).toHaveLength(2);
   });
+
+  it("não grava entrada fantasma quando o setId não existe (exercício apagado)", () => {
+    const c = makeClient();
+    c.history = [{
+      dateKey: "2020-01-01", weekKey: "2019-12-30", dayId: "d1", dayTitle: "Peito",
+      exId: "e1", exName: "Supino", setId: "s1", setIndex: 0,
+      repsGoal: "10", repsDone: "7", load: "30",
+    }];
+    const { history } = applySetFieldChange(c, "d1", "e1", "s-inexistente", "repsDone", "9");
+    expect(history).toEqual(c.history);
+  });
+
+  it("não grava entrada fantasma quando o exId não existe", () => {
+    const c = makeClient();
+    c.history = [{
+      dateKey: "2020-01-01", weekKey: "2019-12-30", dayId: "d1", dayTitle: "Peito",
+      exId: "e1", exName: "Supino", setId: "s1", setIndex: 0,
+      repsGoal: "10", repsDone: "7", load: "30",
+    }];
+    const { history } = applySetFieldChange(c, "d1", "e-inexistente", "s1", "load", "40");
+    expect(history).toEqual(c.history);
+  });
 });
 
 describe("buildLastDoneIndex", () => {
