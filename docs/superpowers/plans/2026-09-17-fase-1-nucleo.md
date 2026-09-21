@@ -1482,7 +1482,7 @@ Confirmar que as mudanças são exatamente: `isOwner` por UID, lista de campos n
 
 - [ ] **Step 5: NÃO fazer deploy ainda**
 
-O deploy destas regras afeta o 1.0 em produção na hora. Ele acontece na Task 14, depois da verificação manual. Deixar o arquivo pronto e commitado.
+O deploy destas regras afeta o 1.0 em produção na hora. Ele acontece na Task 15, depois da verificação manual. Deixar o arquivo pronto e commitado.
 
 - [ ] **Step 6: Commit**
 
@@ -1839,18 +1839,22 @@ git commit -m "feat: adiciona estado central da aplicação"
 
 ---
 
-### Task 12: Interface — estilos, tela de login e componentes de treino
+### Task 12: Interface — estilos e componentes de treino
 
-A maior tarefa da fase. Reproduz a aparência do 1.0 com lit-html, incluindo o comportamento que motivou a troca: digitar em um campo não pode mais tirar o foco dele.
+Os componentes que desenham o treino em si, mais os estilos. Eles não tocam em estado, dados nem rede: recebem o que desenhar e devolvem template. É isso que permite revisá-los isoladamente, e é a metade da interface que dá para cobrir com teste.
 
 **Files:**
-- Create: `src/ui/styles.css`, `src/ui/render.ts`, `src/ui/handlers.ts`, `src/ui/views/gate.ts`, `src/ui/views/trainer.ts`, `src/ui/views/student.ts`, `src/ui/components/day.ts`, `src/ui/components/exercise.ts`, `src/ui/components/set-row.ts`, `src/ui/components/timer.ts`
+- Create: `src/ui/styles.css`, `src/ui/components/set-row.ts`, `src/ui/components/exercise.ts`, `src/ui/components/timer.ts`
 - Test: `src/ui/components/timer.test.ts`
-- Modify: `index.html`, `src/main.ts`
+- Modify: `index.html`
 
 **Interfaces:**
-- Consumes: tudo das tarefas 2 a 11.
-- Produces: `renderApp(): void` em `src/ui/render.ts`.
+- Consumes: tipos de `src/data/schema.ts` (Task 3).
+- Produces:
+  - `setRow(s, index, editable, h): TemplateResult` e a interface `SetRowHandlers`
+  - `exerciseCard(ex, collapsed, editable, h): TemplateResult` e a interface `ExerciseHandlers` (estende `SetRowHandlers`)
+  - `timerButton(startedAt, onToggle): TemplateResult`
+  - `isTimerRunning(startedAt?): boolean`, `formatElapsed(startedAt, now?): string`, `MAX_WORKOUT_MS`
 
 - [ ] **Step 1: Copiar os estilos do 1.0**
 
@@ -2070,9 +2074,30 @@ describe("formatElapsed", () => {
 npm test
 ```
 
-Esperado: PASS, 60 testes.
+Esperado: PASS, 6 testes novos de `timer.test.ts` somados aos já existentes.
 
-- [ ] **Step 7: Criar `src/ui/views/gate.ts`**
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/ui/styles.css src/ui/components/ index.html
+git commit -m "feat: adiciona estilos e componentes de treino com lit-html"
+```
+
+---
+
+### Task 13: Interface — telas e ligação com os dados
+
+A metade que liga tudo: as telas, o render raiz, os handlers que falam com o Firestore, e o `main.ts` que amarra sessão, dados e desenho. É aqui que se verifica no navegador o comportamento que motivou a troca de lit-html: digitar em um campo não pode mais tirar o foco dele.
+
+**Files:**
+- Create: `src/ui/render.ts`, `src/ui/handlers.ts`, `src/ui/views/gate.ts`, `src/ui/views/trainer.ts`, `src/ui/views/student.ts`, `src/ui/components/day.ts`
+- Modify: `src/main.ts`
+
+**Interfaces:**
+- Consumes: os componentes da Task 12; `getState`/`setState`/`subscribe` e `AppState` (Task 11); `saveClient`/`createClient`/`subscribeToClient`/`subscribeToAllClients` (Task 7); `watchSession`/`signIn`/`signOutNow`/`sendPasswordSetup`/`createStudentAccount`/`translateAuthError` (Task 10); `applySetFieldChange` (Task 4); `planPromotion` (Task 6); `archiveOldHistory` (Task 8); `uid` (Task 3).
+- Produces: `renderApp(): void` em `src/ui/render.ts`; app funcionando de ponta a ponta.
+
+- [ ] **Step 1: Criar `src/ui/views/gate.ts`**
 
 ```ts
 import { html, type TemplateResult } from "lit-html";
@@ -2103,7 +2128,7 @@ export function gateView(error: string | null, h: GateHandlers): TemplateResult 
 }
 ```
 
-- [ ] **Step 8: Criar `src/ui/views/trainer.ts`**
+- [ ] **Step 2: Criar `src/ui/views/trainer.ts`**
 
 ```ts
 import { html, type TemplateResult } from "lit-html";
@@ -2161,7 +2186,7 @@ export function trainerView(
 }
 ```
 
-- [ ] **Step 9: Criar `src/ui/views/student.ts` e `src/ui/components/day.ts`**
+- [ ] **Step 3: Criar `src/ui/views/student.ts` e `src/ui/components/day.ts`**
 
 `day.ts`:
 
@@ -2234,7 +2259,7 @@ export function studentView(client: Client, h: StudentHandlers): TemplateResult 
 }
 ```
 
-- [ ] **Step 10: Criar `src/ui/render.ts`**
+- [ ] **Step 4: Criar `src/ui/render.ts`**
 
 ```ts
 import { render, html, nothing } from "lit-html";
@@ -2284,7 +2309,7 @@ export function renderApp(): void {
 subscribe(renderApp);
 ```
 
-- [ ] **Step 11: Criar `src/ui/handlers.ts`**
+- [ ] **Step 5: Criar `src/ui/handlers.ts`**
 
 Este módulo liga a interface aos dados. Ele existe para que as views permaneçam sem dependência de Firebase.
 
@@ -2471,7 +2496,7 @@ export function clientSummary(client: Client): TemplateResult {
 }
 ```
 
-- [ ] **Step 12: Reescrever `src/main.ts` para ligar tudo**
+- [ ] **Step 6: Reescrever `src/main.ts` para ligar tudo**
 
 ```ts
 import "./ui/styles.css";
@@ -2533,7 +2558,7 @@ watchSession((session) => {
 renderApp();
 ```
 
-- [ ] **Step 13: Rodar o app e verificar o bug de foco**
+- [ ] **Step 7: Rodar o app e verificar o bug de foco**
 
 ```bash
 npm run dev
@@ -2546,24 +2571,24 @@ No navegador, logar como aluno, abrir um treino e digitar no campo "feito" **sem
 
 Este é o comportamento que o 1.0 não conseguia entregar sem os helpers `commitFocusedField` e `isTypingInApp`.
 
-- [ ] **Step 14: Rodar a suíte e o build**
+- [ ] **Step 8: Rodar a suíte e o build**
 
 ```bash
 npm test && npm run build
 ```
 
-Esperado: 60 testes passando, build limpo.
+Esperado: suíte inteira passando, build limpo.
 
-- [ ] **Step 15: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
-git add src/ui/ src/main.ts index.html
-git commit -m "feat: adiciona interface do núcleo com lit-html"
+git add src/ui/ src/main.ts
+git commit -m "feat: liga telas, estado e dados com lit-html"
 ```
 
 ---
 
-### Task 13: PWA e deploy automático
+### Task 14: PWA e deploy automático
 
 Fecha o app como instalável e coloca no ar em paralelo ao 1.0.
 
@@ -2707,7 +2732,7 @@ git commit -m "feat: adiciona PWA e publicação automática no Pages"
 
 ---
 
-### Task 14: Colocar no ar e verificar em produção
+### Task 15: Colocar no ar e verificar em produção
 
 Última tarefa. Envolve ações que afetam produção, então cada passo é verificado antes do próximo.
 
