@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { localDateKey, todayKey, weekKeyOf, addWeeks } from "./week";
 
+describe("ambiente de teste", () => {
+  it("roda no fuso de São Paulo (pré-requisito dos testes de data)", () => {
+    expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe("America/Sao_Paulo");
+  });
+});
+
 describe("localDateKey", () => {
   it("formata como YYYY-MM-DD com zero à esquerda", () => {
     expect(localDateKey(new Date(2026, 0, 5))).toBe("2026-01-05");
