@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isTrainer() {
+      return request.auth != null
+             && request.auth.token.email == "fermmura@gmail.com";
+    }
+
+    function isOwner(clientId) {
+      return request.auth != null && request.auth.uid == clientId;
+    }
+
+    match /clients/{clientId} {
+      allow read, write: if isTrainer();
+      allow read: if isOwner(clientId);
+
+      // Lista explícita do que o aluno pode alterar; o resto fica negado por
+      // padrão. activeWeekKey e weekPlans entram porque a promoção de semana
+      // roda no aparelho do aluno. name, email, goal e createdAt ficam de fora.
+      // `password` não está na lista e não é mais escrito por nenhum app.
+      allow update: if isOwner(clientId)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['days','history','cardio','feedback',
+                       'workoutSessions','lastSeen','activeWeekKey','weekPlans']);
+
+      // O 1.0 fazia get() do documento do aluno aqui, o que gera uma leitura
+      // cobrada extra por foto exibida. Como o documento é indexado pelo UID
+      // do Auth, comparar com o caminho dá o mesmo resultado sem custo.
+      match /photos/{exId} {
+        allow read: if isTrainer() || isOwner(clientId);
+        allow write: if isTrainer();
+      }
+
+      // Arquivo de histórico: o aluno escreve na própria porque o
+      // arquivamento roda no aparelho dele.
+      match /historyArchive/{weekKey} {
+        allow read, write: if isTrainer() || isOwner(clientId);
+      }
+    }
+
+    match /settings/{doc} {
+      allow read: if request.auth != null;
+      allow write: if isTrainer();
+    }
+  }
+}
