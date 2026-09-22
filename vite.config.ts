@@ -4,6 +4,7 @@ import { defineConfig } from "vitest/config";
 // `loadEnv` não é reexportado por "vitest/config", então vem do vite direto. Ele
 // enxerga o `.env.local`, coisa que `process.env` sozinho não faz.
 import { loadEnv } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
 import { fileURLToPath, URL } from "node:url";
 
 process.env.TZ = "America/Sao_Paulo";
@@ -46,6 +47,36 @@ export default defineConfig(({ mode, command }) => {
     resolve: {
       alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
     },
+    plugins: [
+      VitePWA({
+        // "prompt", e não "autoUpdate": recarregar sozinho no meio de uma série
+        // apaga o que o aluno estava digitando.
+        registerType: "prompt",
+        includeAssets: ["icon-192.png", "icon-512.png"],
+        manifest: {
+          id: "/muratraining2/",
+          name: "Meu Treino",
+          short_name: "Treino",
+          start_url: "./",
+          scope: "./",
+          display: "standalone",
+          orientation: "portrait",
+          background_color: "#17161A",
+          theme_color: "#17161A",
+          icons: [
+            { src: "icon-192.png", sizes: "192x192", type: "image/png" },
+            { src: "icon-512.png", sizes: "512x512", type: "image/png" },
+            { src: "icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+          ],
+        },
+        workbox: {
+          globPatterns: ["**/*.{js,css,html,png,woff2}"],
+          // O SDK do Firebase cuida do próprio cache offline; interceptar as
+          // chamadas dele aqui atrapalharia a sincronização.
+          navigateFallbackDenylist: [/^\/__/, /firestore\.googleapis\.com/],
+        },
+      }),
+    ],
     test: {
       environment: "node",
       include: ["src/**/*.test.ts"],
