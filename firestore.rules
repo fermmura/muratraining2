@@ -13,7 +13,22 @@ service cloud.firestore {
 
     match /clients/{clientId} {
       allow read, write: if isTrainer();
-      allow read: if isOwner(clientId);
+
+      // `read` são DUAS operações: `get` (um documento) e `list` (consulta na
+      // coleção). Elas precisam de regras diferentes porque os dois apps leem
+      // de formas diferentes, e regra de consulta é avaliada contra as
+      // RESTRIÇÕES DA CONSULTA, não contra os documentos devolvidos.
+      //
+      // O 2.0 lê por id: doc(db, "clients", uid) — satisfeito pelo UID.
+      // O 1.0 lê por consulta: collection("clients").where("email","==",...)
+      // (app.js:103-106). Numa consulta o `clientId` do caminho não está
+      // vinculado a nada, então uma regra por UID é INSATISFAZÍVEL e derruba
+      // todo aluno do 1.0. A regra de `list` continua atrelada ao campo email,
+      // que é exatamente o que a consulta restringe — e exatamente o que as
+      // regras de produção já concedem hoje, sem afrouxar nada.
+      allow get:  if isOwner(clientId);
+      allow list: if request.auth != null
+                  && request.auth.token.email == resource.data.email;
 
       // Lista explícita do que o aluno pode alterar; o resto fica negado por
       // padrão. activeWeekKey e weekPlans entram porque a promoção de semana
