@@ -1341,9 +1341,12 @@ const archivedThisSession = new Set<string>();
  * Move histórico antigo do documento do aluno para a subcoleção.
  *
  * A ordem é deliberada: grava o arquivo PRIMEIRO, limpa o array DEPOIS. Se a
- * segunda operação falhar, o pior caso é a entrada existir nos dois lugares, e
- * `mergeArchivedHistory` reconcilia na leitura. A ordem inversa perderia
- * histórico de treino de forma irrecuperável.
+ * segunda operação falhar, o pior caso é a entrada existir nos dois lugares —
+ * duplicata, recuperável. A ordem inversa perderia histórico de treino de forma
+ * irrecuperável. Na fase 1 a duplicata é inofensiva: quem lê histórico é
+ * `buildLastDoneIndex`, que procura a entrada mais recente. A leitura que junta
+ * arquivo e documento, com a reconciliação por setId+dateKey, nasce na fase 2
+ * junto com a tela de progressão.
  */
 export async function archiveOldHistory(client: Client): Promise<void> {
   if (archivedThisSession.has(client.id)) return;
@@ -1418,7 +1421,22 @@ service cloud.firestore {
 
     match /clients/{clientId} {
       allow read, write: if isTrainer();
-      allow read: if isOwner(clientId);
+
+      // `read` são DUAS operações: `get` (um documento) e `list` (consulta na
+      // coleção). Elas precisam de regras diferentes porque os dois apps leem
+      // de formas diferentes, e regra de consulta é avaliada contra as
+      // RESTRIÇÕES DA CONSULTA, não contra os documentos devolvidos.
+      //
+      // O 2.0 lê por id: doc(db, "clients", uid) — satisfeito pelo UID.
+      // O 1.0 lê por consulta: collection("clients").where("email","==",...)
+      // (app.js:103-106). Numa consulta o `clientId` do caminho não está
+      // vinculado a nada, então uma regra por UID é INSATISFAZÍVEL e derruba
+      // todo aluno do 1.0. A regra de `list` continua atrelada ao campo email,
+      // que é exatamente o que a consulta restringe — e exatamente o que as
+      // regras de produção já concedem hoje, sem afrouxar nada.
+      allow get:  if isOwner(clientId);
+      allow list: if request.auth != null
+                  && request.auth.token.email == resource.data.email;
 
       // Lista explícita do que o aluno pode alterar; o resto fica negado por
       // padrão. activeWeekKey e weekPlans entram porque a promoção de semana
@@ -2318,6 +2336,7 @@ import { html, type TemplateResult } from "lit-html";
 import { getState, setState } from "./state";
 import { saveClient, createClient, type NewClient } from "@/data/client-repo";
 import { applySetFieldChange } from "@/domain/history";
+import { todayKey, weekKeyOf } from "@/domain/week";
 import { uid } from "@/data/id";
 import { signIn, signOutNow, sendPasswordSetup } from "@/auth/session";
 import { createStudentAccount } from "@/auth/invite";
@@ -2372,6 +2391,12 @@ export const trainer = {
       const novo: NewClient = {
         name, email: email.toLowerCase(), goal: "",
         createdAt: Date.now(), days: [], history: [], weekPlans: [],
+        // Sem semear activeWeekKey o aluno nunca vira de semana: planPromotion
+        // faz `activeKey = client.activeWeekKey ?? currentWeekKey`, e a guarda
+        // `currentWeekKey <= activeKey` passa a ser sempre verdadeira. No 1.0 o
+        // campo é semeado pelo calendário, que só chega na fase 2 — aqui ele
+        // precisa nascer com a ficha.
+        activeWeekKey: weekKeyOf(todayKey()),
       };
       await createClient(studentUid, novo);
     } catch (e) {
@@ -2548,7 +2573,18 @@ watchSession((session) => {
   unsubscribeData = subscribeToClient(
     session.uid,
     (client) => {
-      setState({ view: "student", client });
+      // `null` = a conta existe no Auth mas não há ficha. Acontece se a criação
+      // da ficha falhar depois da conta ter sido criada. Sem tratar isso, o
+      // aluno fica em "Carregando…" para sempre, sem erro e sem diagnóstico.
+      if (!client) {
+        setState({
+          view: "gate",
+          client: null,
+          error: "Sua conta existe mas a ficha ainda não foi criada. Fale com seu personal.",
+        });
+        return;
+      }
+      setState({ view: "student", client, error: null });
       void onClientLoaded(client);
     },
     (e) => setState({ error: e.message }),
@@ -2689,6 +2725,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # O build falha sozinho se algum secret estiver ausente ou vazio: a
+      # verificação mora em vite.config.ts (Task 7), que cobre tanto este
+      # workflow quanto o `npm run build` de quem roda na própria máquina.
       - run: npm run build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
@@ -2771,6 +2810,23 @@ Com as regras antigas ainda valendo, abrir o 2.0 e verificar, usando a própria 
 
 Se qualquer item falhar, parar aqui: as regras novas não devem ser aplicadas sobre um app que ainda não lê corretamente.
 
+- [ ] **Step 5b: Auditar os ids dos documentos ANTES de aplicar as regras**
+
+A regra de `get` do aluno assume que o id do documento é o UID da conta no Firebase Auth.
+O código do 1.0 sempre criou assim (`app.js:247` e `app.js:406`, ambos `doc(cred.user.uid)`),
+mas as regras vão valer para dados escritos por toda versão histórica do app — e a leitura
+do 1.0 (`app.js:108`, `snap.docs[0]`) tolera id arbitrário, então uma divergência nunca
+apareceu.
+
+Para cada documento em `clients`, confirmar no Console que o id aparece em
+Authentication > Users. Um documento cujo id não seja o UID do dono deixa aquele aluno sem
+`get`, sem `update` e sem leitura de foto no 2.0 — e o treinador continuaria enxergando
+tudo, fazendo o defeito parecer específico daquele aluno e difícil de diagnosticar.
+
+Se houver divergência, migrar antes do deploy: copiar para `doc(uid)` e apagar o antigo.
+O `resetStudentLogin` do 1.0 (`app.js:399-411`) já tem exatamente essa forma e serve de
+modelo.
+
 - [ ] **Step 6: Aplicar as regras novas**
 
 Este passo afeta o 1.0 em produção imediatamente.
@@ -2782,6 +2838,18 @@ npx firebase-tools deploy --only firestore:rules
 - [ ] **Step 7: Verificar que o 1.0 continua funcionando**
 
 Abrir o 1.0 com a conta de treinador e com uma conta de aluno. Confirmar que ambos ainda leem e salvam. As regras novas foram desenhadas para não quebrá-lo, mas isso precisa ser observado, não presumido.
+
+**Uma mudança visível esperada, que não é defeito.** O 1.0 carrega o tema publicado em
+`app.js:55`, no carregamento do módulo — ou seja, antes de qualquer login. Com `/settings`
+passando a exigir autenticação, essa leitura é negada enquanto ninguém está logado, e o
+`try/catch` de `app.js:51` cai no tema padrão. Efeito: **a tela de login do 1.0 passa a
+aparecer com as cores padrão** em vez das personalizadas. Depois do login tudo volta ao
+normal. Se as cores nunca foram personalizadas, não há diferença nenhuma.
+
+Isso é o preço de fechar uma leitura pública sem autenticação, e vale a pena: `allow read:
+if true` valeria para qualquer documento que viesse a existir em `/settings`, não só o tema.
+A forma certa de ter login personalizado no 2.0 é embutir o tema no build, não reabrir o
+banco — decisão da fase 4, quando a personalização de tema chegar.
 
 Se o aluno não conseguir salvar, reverter na hora:
 

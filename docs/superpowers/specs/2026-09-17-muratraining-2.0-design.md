@@ -127,8 +127,25 @@ O 1.0 libera `/settings` para leitura sem autenticação (`allow read: if true`)
 permite que o aluno altere qualquer campo do próprio documento exceto `name`, `email`
 e `goal` — incluindo a própria senha e todo o histórico.
 
-**Correção.** Lista explícita do que o aluno pode alterar, com o resto negado por
-padrão:
+**Correção, parte 1: leitura.** `read` no Firestore são duas operações distintas, `get`
+(um documento) e `list` (consulta na coleção), e elas precisam de regras separadas aqui
+porque os dois apps leem de formas diferentes. O 2.0 lê a ficha por id. O 1.0 lê por
+consulta filtrada em `email` (`app.js:103-106`), e regra de consulta é avaliada contra as
+**restrições da consulta**, não contra os documentos devolvidos — numa consulta de coleção
+o id do caminho não está vinculado a nada, então uma regra baseada em UID é insatisfazível
+e derrubaria todo aluno do 1.0 no instante do deploy.
+
+```
+allow get:  if isOwner(clientId);
+allow list: if request.auth != null
+            && request.auth.token.email == resource.data.email;
+```
+
+A regra de `list` continua atrelada ao campo `email` — que é o que a consulta restringe, e
+o que as regras de produção já concedem hoje. Nada é afrouxado.
+
+**Correção, parte 2: escrita.** Lista explícita do que o aluno pode alterar, com o resto
+negado por padrão:
 
 ```
 allow update: if isOwner(resource)
