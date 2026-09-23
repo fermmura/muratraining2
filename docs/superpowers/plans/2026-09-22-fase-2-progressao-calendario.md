@@ -23,7 +23,7 @@ Valem para **todas** as tarefas. São as mesmas da fase 1, que continuam valendo
 - **Projeto Firebase:** `muratraining-7af9b` (o mesmo do 1.0).
 - **Esta fase não altera `firestore.rules`.** As regras da fase 1 já permitem que dono e treinador leiam `historyArchive`. Se alguma tarefa parecer exigir regra nova, pare e escale.
 - **Nenhuma dependência nova** em `package.json`.
-- Comentários e textos de interface em português. Identificadores de código em inglês.
+- Comentários e textos de interface em português. Identificadores de código em inglês — **inclusive variáveis locais e identificadores dentro dos testes**. Onde um bloco de código deste plano usar nome local em português, renomeie ao transcrever.
 - **Nenhum arquivo passa de ~250 linhas.** Se passar, divida por assunto.
 
 ## O que já existe da fase 1
@@ -523,7 +523,8 @@ export function buildProgressionRows(history: HistoryEntry[]): ProgressionRow[] 
 /** As semanas com registro, da mais antiga para a mais nova. São as colunas da tabela. */
 export function progressionWeekKeys(history: HistoryEntry[]): string[] {
   const weeks = new Set<string>();
-  for (const h of history) if (h.weekKey) weeks.add(h.weekKey);
+  // mesmo predicado de buildProgressionRows: senão nasce coluna sem nenhuma linha
+  for (const h of history) if (h.exName && h.weekKey) weeks.add(h.weekKey);
   return [...weeks].sort();
 }
 
@@ -538,7 +539,9 @@ export function weeklySetCounts(history: HistoryEntry[]): { weekKey: string; cou
   const porSemana = new Map<string, Set<string>>();
   for (const h of history) {
     if (!h.weekKey || !h.repsDone) continue;
-    const chave = `${h.exName}|${h.setIndex}`;
+    // o dia entra na chave: o mesmo exercício em dois dias da mesma semana são
+    // duas séries feitas, não uma
+    const chave = `${h.dayTitle}|${h.exName}|${h.setIndex}`;
     const set = porSemana.get(h.weekKey);
     if (set) set.add(chave);
     else porSemana.set(h.weekKey, new Set([chave]));
@@ -559,6 +562,8 @@ function numberOf(cell: ProgressionCell): number {
 /** Direção da seta entre a semana anterior preenchida e a atual. */
 export function trendOf(prev: ProgressionCell | null, cur: ProgressionCell): Trend {
   if (!prev) return "none";
+  // comparar carga com repetição inventa tendência: 30kg contra 10 reps não é queda
+  if (Boolean(prev.load) !== Boolean(cur.load)) return "none";
   const a = numberOf(prev);
   const b = numberOf(cur);
   if (Number.isNaN(a) || Number.isNaN(b)) return "none";
@@ -933,7 +938,8 @@ function countDoneInWeek(client: Client, weekKey: string): number {
   const feitas = new Set<string>();
   for (const h of client.history ?? []) {
     if (h.weekKey !== weekKey || !h.repsDone) continue;
-    feitas.add(`${h.exName}|${h.setIndex}`);
+    // mesma chave de weeklySetCounts, senão a semana muda de número ao deixar de ser a atual
+    feitas.add(`${h.dayTitle}|${h.exName}|${h.setIndex}`);
   }
   return feitas.size;
 }
@@ -944,7 +950,9 @@ function countDoneInWeek(client: Client, weekKey: string): number {
  * divergir quando o aluno fica semanas sem abrir o app.
  */
 export function buildCalendarWeeks(client: Client): CalendarWeek[] {
-  const activeKey = client.activeWeekKey || weekKeyOf(todayKey());
+  // normaliza para segunda-feira: activeWeekKey gravado em outro dia faria toda
+  // comparação com o weekKey do histórico falhar, zerando o calendário em silêncio
+  const activeKey = weekKeyOf(client.activeWeekKey || todayKey());
   const plans = client.weekPlans ?? [];
 
   return CALENDAR_OFFSETS.map((offset) => {
