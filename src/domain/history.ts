@@ -4,6 +4,34 @@ import type { Client, Day, HistoryEntry } from "@/data/schema";
 /** Campos de série cuja alteração vira registro de histórico. */
 const TRACKED_FIELDS = new Set(["repsDone", "load"]);
 
+/**
+ * Troca um campo de uma série dentro do array de dias, sem tocar em histórico.
+ * Exportada porque a edição de plano de semana futura usa o mesmo mapeamento e
+ * NÃO deve gerar histórico: planejar não é treinar.
+ */
+export function setFieldInDays(
+  days: Day[],
+  dayId: string,
+  exId: string,
+  setId: string,
+  field: string,
+  value: string,
+): Day[] {
+  return (days ?? []).map((d) => {
+    if (d.id !== dayId) return d;
+    return {
+      ...d,
+      exercises: (d.exercises ?? []).map((ex) => {
+        if (ex.id !== exId) return ex;
+        return {
+          ...ex,
+          sets: (ex.sets ?? []).map((s) => (s.id === setId ? { ...s, [field]: value } : s)),
+        };
+      }),
+    };
+  });
+}
+
 export function applySetFieldChange(
   client: Client,
   dayId: string,
@@ -12,58 +40,33 @@ export function applySetFieldChange(
   field: string,
   value: string,
 ): { days: Day[]; history: HistoryEntry[] } {
-  let dayTitle = "";
-  let exName = "";
-  let setIndex = 0;
-
-  const days = (client.days ?? []).map((d) => {
-    if (d.id !== dayId) return d;
-    dayTitle = d.title;
-    return {
-      ...d,
-      exercises: (d.exercises ?? []).map((ex) => {
-        if (ex.id !== exId) return ex;
-        exName = ex.name;
-        return {
-          ...ex,
-          sets: (ex.sets ?? []).map((s, i) => {
-            if (s.id !== setId) return s;
-            setIndex = i;
-            return { ...s, [field]: value };
-          }),
-        };
-      }),
-    };
-  });
+  const days = setFieldInDays(client.days ?? [], dayId, exId, setId, field, value);
 
   const previous = client.history ?? [];
   if (!TRACKED_FIELDS.has(field)) return { days, history: previous };
 
+  const day = days.find((d) => d.id === dayId);
+  const ex = day?.exercises.find((e) => e.id === exId);
+  const setIndex = ex?.sets.findIndex((s) => s.id === setId) ?? -1;
+  const set = setIndex >= 0 ? ex?.sets[setIndex] : undefined;
+  // série não encontrada: não inventa entrada de histórico fantasma
+  if (!day || !ex || !set) return { days, history: previous };
+
   const dateKey = todayKey();
-  const set = days
-    .find((d) => d.id === dayId)
-    ?.exercises.find((e) => e.id === exId)
-    ?.sets.find((s) => s.id === setId);
-
-  // Sem a série não há o que registrar: gravar aqui produziria uma entrada com
-  // exName vazio e setIndex 0, lixo que vai para o documento do aluno. Acontece
-  // quando o treinador apaga um exercício enquanto o aluno digita nele.
-  if (!set) return { days, history: previous };
-
   // Uma série editada várias vezes no mesmo dia deixa UMA entrada, não uma por tecla.
   const history = previous.filter((h) => !(h.setId === setId && h.dateKey === dateKey));
   history.push({
     dateKey,
     weekKey: weekKeyOf(dateKey),
     dayId,
-    dayTitle,
+    dayTitle: day.title,
     exId,
-    exName,
+    exName: ex.name,
     setId,
     setIndex,
-    repsGoal: set?.repsGoal ?? "",
-    repsDone: set?.repsDone ?? "",
-    load: set?.load ?? "",
+    repsGoal: set.repsGoal ?? "",
+    repsDone: set.repsDone ?? "",
+    load: set.load ?? "",
   });
 
   return { days, history };
