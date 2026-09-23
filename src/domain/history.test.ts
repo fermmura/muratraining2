@@ -128,8 +128,8 @@ describe("buildLastDoneIndex", () => {
   });
 
   it("ignora entradas sem nada registrado", () => {
-    const vazia: HistoryEntry = { ...entries[0], dateKey: "2026-09-21", repsDone: "", load: "" };
-    const idx = buildLastDoneIndex([...entries, vazia]);
+    const empty: HistoryEntry = { ...entries[0], dateKey: "2026-09-21", repsDone: "", load: "" };
+    const idx = buildLastDoneIndex([...entries, empty]);
     expect(idx.get("Supino|0")?.load).toBe("35");
   });
 

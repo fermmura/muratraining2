@@ -32,10 +32,10 @@ describe("createPlan", () => {
   });
 
   it("copiando, traz os exercícios com ids novos", () => {
-    const plano = createPlan(client(), "2026-09-21", "copy");
-    expect(plano.days[0].exercises[0].name).toBe("Supino");
-    expect(plano.days[0].id).not.toBe("d1");
-    expect(plano.days[0].exercises[0].sets[0].id).not.toBe("s1");
+    const plan = createPlan(client(), "2026-09-21", "copy");
+    expect(plan.days[0].exercises[0].name).toBe("Supino");
+    expect(plan.days[0].id).not.toBe("d1");
+    expect(plan.days[0].exercises[0].sets[0].id).not.toBe("s1");
   });
 
   it("copiando, zera o feito e guarda a referência da semana anterior", () => {

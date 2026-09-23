@@ -49,7 +49,9 @@ export function applySetFieldChange(
   const ex = day?.exercises.find((e) => e.id === exId);
   const setIndex = ex?.sets.findIndex((s) => s.id === setId) ?? -1;
   const set = setIndex >= 0 ? ex?.sets[setIndex] : undefined;
-  // série não encontrada: não inventa entrada de histórico fantasma
+  // Sem a série não há o que registrar: gravar aqui produziria uma entrada com
+  // exName vazio e setIndex 0, lixo que vai para o documento do aluno. Acontece
+  // quando o treinador apaga um exercício enquanto o aluno digita nele.
   if (!day || !ex || !set) return { days, history: previous };
 
   const dateKey = todayKey();
