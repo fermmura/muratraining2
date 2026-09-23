@@ -159,4 +159,13 @@ describe("trendOf", () => {
   it("não compara quando o valor não é número", () => {
     expect(trendOf(cell("meia série"), cell("30"))).toBe("none");
   });
+
+  it("não compara carga com repetição quando a carga sai da série", () => {
+    // treinador tirou a carga prescrita: comparar 30 (carga) com 10 (reps) inventaria tendência
+    expect(trendOf(cell("30"), cell("", "10"))).toBe("none");
+  });
+
+  it("não compara repetição com carga quando a carga aparece na série", () => {
+    expect(trendOf(cell("", "8"), cell("30"))).toBe("none");
+  });
 });

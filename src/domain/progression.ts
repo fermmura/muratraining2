@@ -101,6 +101,9 @@ function numberOf(cell: ProgressionCell): number {
 /** Direção da seta entre a semana anterior preenchida e a atual. */
 export function trendOf(prev: ProgressionCell | null, cur: ProgressionCell): Trend {
   if (!prev) return "none";
+  // carga só de um lado não é comparável com repetição do outro: comparar 30kg
+  // com 10 reps inventaria uma tendência quando o treinador só tirou a carga
+  if (Boolean(prev.load) !== Boolean(cur.load)) return "none";
   const a = numberOf(prev);
   const b = numberOf(cur);
   if (Number.isNaN(a) || Number.isNaN(b)) return "none";
