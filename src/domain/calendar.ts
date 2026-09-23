@@ -49,7 +49,10 @@ function countDoneInWeek(client: Client, weekKey: string): number {
  * divergir quando o aluno fica semanas sem abrir o app.
  */
 export function buildCalendarWeeks(client: Client): CalendarWeek[] {
-  const activeKey = client.activeWeekKey || weekKeyOf(todayKey());
+  // normaliza mesmo o valor armazenado: se activeWeekKey chegar num dia que
+  // não é segunda, as semanas do calendário deixariam de bater com o weekKey
+  // (sempre segunda) do histórico, zerando a contagem em silêncio
+  const activeKey = weekKeyOf(client.activeWeekKey || todayKey());
   const plans = client.weekPlans ?? [];
 
   return CALENDAR_OFFSETS.map((offset) => {

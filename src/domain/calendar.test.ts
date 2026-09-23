@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildCalendarWeeks, isWeekOutOfSync, CALENDAR_OFFSETS } from "./calendar";
+import { weekKeyOf, todayKey } from "./week";
 import type { Client, Day, HistoryEntry } from "@/data/schema";
 
 function days(): Day[] {
@@ -97,7 +98,13 @@ describe("buildCalendarWeeks", () => {
 
   it("funciona sem activeWeekKey usando a semana de hoje", () => {
     const c = client({ activeWeekKey: undefined });
-    expect(buildCalendarWeeks(c).find((w) => w.offset === 0)?.state).toBe("current");
+    expect(buildCalendarWeeks(c).find((w) => w.offset === 0)?.weekKey).toBe(weekKeyOf(todayKey()));
+  });
+
+  it("normaliza activeWeekKey para a segunda-feira daquela semana", () => {
+    // relógio errado ou aluno inativo podem deixar activeWeekKey num dia que não é segunda
+    const c = client({ activeWeekKey: "2026-09-16" }); // quarta-feira
+    expect(buildCalendarWeeks(c).find((w) => w.offset === 0)?.weekKey).toBe("2026-09-14");
   });
 });
 
