@@ -1,9 +1,9 @@
-import { doc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 import { splitHistoryForArchive } from "@/domain/archive";
 import { todayKey, weekKeyOf } from "@/domain/week";
 import { saveClient } from "./client-repo";
-import type { Client, HistoryArchiveDoc } from "./schema";
+import type { Client, HistoryArchiveDoc, HistoryEntry } from "./schema";
 
 const ARCHIVE = "historyArchive";
 
@@ -38,4 +38,24 @@ export async function archiveOldHistory(client: Client): Promise<void> {
     // libera para tentar de novo na próxima sessão; nada foi perdido
     archivedThisSession.delete(client.id);
   }
+}
+
+/**
+ * Uma semana do arquivo. Usada pela tela de semana passada, que sabe exatamente
+ * qual semana quer: uma leitura dirigida, e não a coleção inteira.
+ */
+export async function loadArchivedWeek(clientId: string, weekKey: string): Promise<HistoryEntry[]> {
+  const snap = await getDoc(doc(db, "clients", clientId, ARCHIVE, weekKey));
+  const data = snap.data() as HistoryArchiveDoc | undefined;
+  return data?.entries ?? [];
+}
+
+/**
+ * Todo o arquivo do aluno. Custa uma leitura por semana arquivada — para quem usa
+ * há dois anos, perto de oitenta. Por isso fica atrás de um botão na progressão e
+ * nunca roda na abertura de tela.
+ */
+export async function loadAllArchived(clientId: string): Promise<HistoryEntry[]> {
+  const snap = await getDocs(collection(db, "clients", clientId, ARCHIVE));
+  return snap.docs.flatMap((d) => (d.data() as HistoryArchiveDoc).entries ?? []);
 }
