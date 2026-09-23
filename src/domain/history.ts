@@ -49,9 +49,11 @@ export function applySetFieldChange(
   const ex = day?.exercises.find((e) => e.id === exId);
   const setIndex = ex?.sets.findIndex((s) => s.id === setId) ?? -1;
   const set = setIndex >= 0 ? ex?.sets[setIndex] : undefined;
-  // Sem a série não há o que registrar: gravar aqui produziria uma entrada com
-  // exName vazio e setIndex 0, lixo que vai para o documento do aluno. Acontece
-  // quando o treinador apaga um exercício enquanto o aluno digita nele.
+  // Sem dia, exercício ou série não há o que registrar, e o push abaixo lê
+  // `day.title`, `ex.name` e `set.repsGoal` direto: sem esta guarda ele
+  // estouraria em cima de undefined no meio da digitação do aluno, e o
+  // setIndex que iria junto já seria -1. Acontece quando o treinador apaga um
+  // exercício enquanto o aluno está digitando nele.
   if (!day || !ex || !set) return { days, history: previous };
 
   const dateKey = todayKey();
