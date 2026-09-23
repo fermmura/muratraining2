@@ -87,6 +87,11 @@ describe("progressionWeekKeys", () => {
   it("ignora entrada sem semana", () => {
     expect(progressionWeekKeys([entry({ weekKey: "" })])).toEqual([]);
   });
+
+  it("ignora entrada com semana válida e nome de exercício vazio", () => {
+    // a mesma entrada não cria linha em buildProgressionRows; não pode criar coluna aqui
+    expect(progressionWeekKeys([entry({ exName: "" })])).toEqual([]);
+  });
 });
 
 describe("weeklySetCounts", () => {

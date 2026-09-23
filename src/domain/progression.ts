@@ -63,7 +63,12 @@ export function buildProgressionRows(history: HistoryEntry[]): ProgressionRow[] 
 /** As semanas com registro, da mais antiga para a mais nova. São as colunas da tabela. */
 export function progressionWeekKeys(history: HistoryEntry[]): string[] {
   const weeks = new Set<string>();
-  for (const h of history) if (h.weekKey) weeks.add(h.weekKey);
+  // mesmo filtro de buildProgressionRows: entrada sem nome não vira linha, e
+  // não pode virar coluna vazia na tabela
+  for (const h of history) {
+    if (!h.exName || !h.weekKey) continue;
+    weeks.add(h.weekKey);
+  }
   return [...weeks].sort();
 }
 
