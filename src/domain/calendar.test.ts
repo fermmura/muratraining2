@@ -59,6 +59,18 @@ describe("buildCalendarWeeks", () => {
     expect(passada?.setsDone).toBe(2);
   });
 
+  it("conta série repetida em dias diferentes da semana passada", () => {
+    // mesma série, mesmo exercício, dias diferentes: cada dia conta
+    const c = client({
+      history: [
+        entry({ dayTitle: "Peito A", setId: "s1" }),
+        entry({ dayTitle: "Peito B", setId: "s2" }),
+      ],
+    });
+    const past = buildCalendarWeeks(c).find((w) => w.offset === -1);
+    expect(past?.setsDone).toBe(2);
+  });
+
   it("marca semana anterior sem registro como concluída sem séries", () => {
     const passada = buildCalendarWeeks(client()).find((w) => w.offset === -1);
     expect(passada?.state).toBe("past");

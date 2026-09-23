@@ -117,6 +117,15 @@ describe("weeklySetCounts", () => {
       { weekKey: "2026-09-14", count: 1 },
     ]);
   });
+
+  it("conta a mesma série repetida em dias diferentes da semana", () => {
+    // repetir exercício em dias diferentes na mesma semana é rotina; cada dia conta
+    const r = weeklySetCounts([
+      entry({ dayTitle: "Peito A", dateKey: "2026-09-15", setId: "s1" }),
+      entry({ dayTitle: "Peito B", dateKey: "2026-09-17", setId: "s2" }),
+    ]);
+    expect(r).toEqual([{ weekKey: "2026-09-14", count: 2 }]);
+  });
 });
 
 describe("trendOf", () => {

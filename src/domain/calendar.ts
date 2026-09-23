@@ -33,12 +33,14 @@ function countCurrentWeek(client: Client): { done: number; total: number } {
 }
 
 function countDoneInWeek(client: Client, weekKey: string): number {
-  const feitas = new Set<string>();
+  const doneKeys = new Set<string>();
   for (const h of client.history ?? []) {
     if (h.weekKey !== weekKey || !h.repsDone) continue;
-    feitas.add(`${h.exName}|${h.setIndex}`);
+    // inclui o dia: repetir o mesmo exercício em dias diferentes da semana é
+    // rotina comum, e cada dia é uma série distinta feita
+    doneKeys.add(`${h.dayTitle}|${h.exName}|${h.setIndex}`);
   }
-  return feitas.size;
+  return doneKeys.size;
 }
 
 /**

@@ -75,16 +75,18 @@ export function progressionWeekKeys(history: HistoryEntry[]): string[] {
  * `repsDone` não conta: carga prescrita pelo treinador não é treino feito.
  */
 export function weeklySetCounts(history: HistoryEntry[]): { weekKey: string; count: number }[] {
-  const porSemana = new Map<string, Set<string>>();
+  const countsByWeek = new Map<string, Set<string>>();
   for (const h of history) {
     if (!h.weekKey || !h.repsDone) continue;
-    const chave = `${h.exName}|${h.setIndex}`;
-    const set = porSemana.get(h.weekKey);
-    if (set) set.add(chave);
-    else porSemana.set(h.weekKey, new Set([chave]));
+    // inclui o dia: repetir o mesmo exercício em dias diferentes da semana é
+    // rotina comum, e cada dia é uma série distinta feita
+    const key = `${h.dayTitle}|${h.exName}|${h.setIndex}`;
+    const seriesKeys = countsByWeek.get(h.weekKey);
+    if (seriesKeys) seriesKeys.add(key);
+    else countsByWeek.set(h.weekKey, new Set([key]));
   }
-  return [...porSemana.entries()]
-    .map(([weekKey, series]) => ({ weekKey, count: series.size }))
+  return [...countsByWeek.entries()]
+    .map(([weekKey, seriesKeys]) => ({ weekKey, count: seriesKeys.size }))
     .sort((a, b) => a.weekKey.localeCompare(b.weekKey));
 }
 
