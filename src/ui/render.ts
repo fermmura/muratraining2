@@ -19,7 +19,7 @@ function template() {
       const client = s.clients.find((c) => c.id === s.selectedClientId) ?? null;
       const day = client?.days?.find((d) => d.id === s.activeDayId);
       const body = day
-        ? dayView(day, s.collapsedExercises, true, handlers.day)
+        ? dayView(day, s.collapsedExercises, true, true, handlers.day)
         : client
           ? handlers.clientSummary(client)
           : null;
@@ -32,7 +32,7 @@ function template() {
       // registra. "feito" e "kg" continuam editáveis porque set-row não os
       // condiciona a `editable` — é exatamente essa a divisão de papéis.
       return day
-        ? dayView(day, s.collapsedExercises, false, handlers.day)
+        ? dayView(day, s.collapsedExercises, false, true, handlers.day)
         : studentView(s.client, handlers.student);
     }
   }

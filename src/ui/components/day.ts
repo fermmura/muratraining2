@@ -13,13 +13,15 @@ export function dayView(
   day: Day,
   collapsed: ReadonlySet<string>,
   editable: boolean,
+  showTimer: boolean,
   h: DayHandlers,
 ): TemplateResult {
   return html`
     <div class="day-head">
       <button class="back" @click=${h.onBack}><i class="ti ti-arrow-left"></i></button>
       <span class="day-title display">${day.title}</span>
-      ${timerButton(day.timerStartedAt, () => h.onToggleTimer(day.id))}
+      <!-- num plano de semana futura não há sessão de treino para cronometrar -->
+      ${showTimer ? timerButton(day.timerStartedAt, () => h.onToggleTimer(day.id)) : null}
     </div>
 
     ${(day.exercises ?? []).map((ex) => exerciseCard(ex, collapsed.has(ex.id), editable, h))}
