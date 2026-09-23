@@ -215,3 +215,61 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   .sidebar { width: 100%; border-radius: 12px 12px 0 0; border-right: none; border-bottom: 1px solid var(--line); }
   .main { border-radius: 0 0 12px 12px; }
 }
+
+/* ----- fase 2: calendário ----- */
+.cal-list { display: flex; flex-direction: column; gap: 8px; }
+.cal-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+.cal-row .cal-icon { font-size: 18px; color: var(--steel); }
+.cal-row .cal-range { font-size: 13px; color: var(--chalk); }
+.cal-row .cal-state { font-size: 11px; color: var(--muted); }
+.cal-row.past { opacity: .65; }
+.cal-row.past .cal-icon { color: var(--green); }
+.cal-row.current { background: #2A2018; border-color: var(--red); }
+.cal-row.current .cal-icon { color: var(--red); }
+.cal-row.current .cal-range { font-weight: 600; }
+.cal-row.planned .cal-icon { color: var(--plate); }
+.cal-warning { background: var(--redDim); border: 1px solid var(--red); border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: var(--chalk); }
+.cal-warning button { display: block; margin-top: 6px; color: var(--plate); text-decoration: underline;
+  background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+
+/* escolha entre copiar a semana atual e começar do zero */
+.plan-choice { background: var(--panelAlt); border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+.plan-choice p { margin: 0; font-size: 13px; color: var(--chalk); }
+.plan-banner { background: var(--panelAlt); border: 1px solid var(--plate); border-radius: 10px;
+  padding: 8px 12px; margin-bottom: 12px; font-size: 12px; color: var(--plate); }
+
+/* ----- fase 2: progressão ----- */
+.prog-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.prog-tabs .dashed-btn.active { border-style: solid; color: var(--chalk); }
+.prog-scroll { overflow-x: auto; }
+.prog-table { border-collapse: collapse; width: 100%; font-size: 12px; }
+.prog-table th { padding: 6px 10px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+.prog-table td { padding: 6px 10px; text-align: center; white-space: nowrap; color: var(--chalk); }
+.prog-table tbody tr { border-top: 1px solid var(--line); }
+.prog-table .row-head { text-align: left; position: sticky; left: 0; background: var(--bg); }
+.prog-table thead .row-head { background: var(--panel); }
+.prog-table .empty-cell { color: var(--line); }
+.trend-up { color: var(--green); }
+.trend-down { color: var(--red); }
+.prog-footer { margin-top: 14px; display: flex; justify-content: center; }
+
+/* gráfico: uma série de dados, portanto uma cor só e sem legenda */
+.chart svg { width: 100%; height: auto; display: block; }
+.chart-bar { fill: var(--steel); }
+.chart-bar.selected { fill: var(--plate); }
+.chart-hit { fill: transparent; cursor: pointer; }
+.chart-axis { stroke: var(--line); stroke-width: 1; }
+.chart-tick { fill: var(--muted); font-size: 10px; }
+.chart-readout { text-align: center; font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+
+/* ----- fase 2: semana passada ----- */
+.past-day { margin-bottom: 18px; }
+.past-day h3 { font-family: var(--font-display); font-size: 16px; margin: 0 0 8px; color: var(--chalk); }
+.past-ex { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 8px; }
+.past-ex .past-name { font-size: 13px; color: var(--chalk); margin-bottom: 6px; }
+.past-set { display: flex; gap: 8px; font-size: 12px; color: var(--muted); }
+.past-set .past-idx { width: 18px; color: var(--line); }
