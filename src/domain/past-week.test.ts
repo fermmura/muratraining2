@@ -12,46 +12,46 @@ function entry(over: Partial<HistoryEntry> = {}): HistoryEntry {
 
 describe("groupWeekByDay", () => {
   it("agrupa por dia de treino", () => {
-    const dias = groupWeekByDay(
+    const result = groupWeekByDay(
       [entry(), entry({ dayTitle: "Costas", exName: "Remada", setId: "s2" })],
       "2026-09-14",
     );
-    expect(dias.map((d) => d.dayTitle)).toEqual(["Costas", "Peito"]);
+    expect(result.map((d) => d.dayTitle)).toEqual(["Costas", "Peito"]);
   });
 
   it("agrupa exercícios dentro do dia", () => {
-    const [dia] = groupWeekByDay(
+    const [day] = groupWeekByDay(
       [entry(), entry({ exName: "Crucifixo", setId: "s2" })],
       "2026-09-14",
     );
-    expect(dia.exercises.map((e) => e.exName)).toEqual(["Crucifixo", "Supino"]);
+    expect(day.exercises.map((e) => e.exName)).toEqual(["Crucifixo", "Supino"]);
   });
 
   it("ordena as séries pelo índice", () => {
-    const [dia] = groupWeekByDay(
+    const [day] = groupWeekByDay(
       [entry({ setIndex: 2, setId: "s3" }), entry({ setIndex: 0 }), entry({ setIndex: 1, setId: "s2" })],
       "2026-09-14",
     );
-    expect(dia.exercises[0].sets.map((s) => s.setIndex)).toEqual([0, 1, 2]);
+    expect(day.exercises[0].sets.map((s) => s.setIndex)).toEqual([0, 1, 2]);
   });
 
   it("ignora as outras semanas", () => {
-    const dias = groupWeekByDay([entry({ weekKey: "2026-09-07" })], "2026-09-14");
-    expect(dias).toEqual([]);
+    const result = groupWeekByDay([entry({ weekKey: "2026-09-07" })], "2026-09-14");
+    expect(result).toEqual([]);
   });
 
   it("na mesma série, vence o registro de data mais recente", () => {
-    const [dia] = groupWeekByDay(
+    const [day] = groupWeekByDay(
       [entry({ dateKey: "2026-09-15", load: "30" }), entry({ dateKey: "2026-09-17", load: "40" })],
       "2026-09-14",
     );
-    expect(dia.exercises[0].sets).toHaveLength(1);
-    expect(dia.exercises[0].sets[0].load).toBe("40");
+    expect(day.exercises[0].sets).toHaveLength(1);
+    expect(day.exercises[0].sets[0].load).toBe("40");
   });
 
   it("usa um título genérico quando o dia não tem nome", () => {
-    const [dia] = groupWeekByDay([entry({ dayTitle: "" })], "2026-09-14");
-    expect(dia.dayTitle).toBe("Treino");
+    const [day] = groupWeekByDay([entry({ dayTitle: "" })], "2026-09-14");
+    expect(day.dayTitle).toBe("Treino");
   });
 
   it("devolve lista vazia sem histórico", () => {

@@ -37,10 +37,10 @@ describe("buildCalendarWeeks", () => {
 
   it("ancora na semana ativa, não na data de hoje", () => {
     // é activeWeekKey que decide qual treino o aluno está fazendo
-    const semanas = buildCalendarWeeks(client({ activeWeekKey: "2026-09-14" }));
-    expect(semanas.find((w) => w.offset === 0)?.weekKey).toBe("2026-09-14");
-    expect(semanas.find((w) => w.offset === -1)?.weekKey).toBe("2026-09-07");
-    expect(semanas.find((w) => w.offset === 1)?.weekKey).toBe("2026-09-21");
+    const weeks = buildCalendarWeeks(client({ activeWeekKey: "2026-09-14" }));
+    expect(weeks.find((w) => w.offset === 0)?.weekKey).toBe("2026-09-14");
+    expect(weeks.find((w) => w.offset === -1)?.weekKey).toBe("2026-09-07");
+    expect(weeks.find((w) => w.offset === 1)?.weekKey).toBe("2026-09-21");
   });
 
   it("marca a semana ativa como atual", () => {
@@ -48,16 +48,16 @@ describe("buildCalendarWeeks", () => {
   });
 
   it("conta séries feitas e totais da semana atual", () => {
-    const atual = buildCalendarWeeks(client()).find((w) => w.offset === 0);
-    expect(atual?.setsDone).toBe(1);
-    expect(atual?.setsTotal).toBe(2);
+    const current = buildCalendarWeeks(client()).find((w) => w.offset === 0);
+    expect(current?.setsDone).toBe(1);
+    expect(current?.setsTotal).toBe(2);
   });
 
   it("marca semana anterior com registro como concluída e conta as séries", () => {
     const c = client({ history: [entry(), entry({ setId: "s2", setIndex: 1 })] });
-    const passada = buildCalendarWeeks(c).find((w) => w.offset === -1);
-    expect(passada?.state).toBe("past");
-    expect(passada?.setsDone).toBe(2);
+    const past = buildCalendarWeeks(c).find((w) => w.offset === -1);
+    expect(past?.state).toBe("past");
+    expect(past?.setsDone).toBe(2);
   });
 
   it("conta série repetida em dias diferentes da semana passada", () => {
@@ -73,22 +73,22 @@ describe("buildCalendarWeeks", () => {
   });
 
   it("marca semana anterior sem registro como concluída sem séries", () => {
-    const passada = buildCalendarWeeks(client()).find((w) => w.offset === -1);
-    expect(passada?.state).toBe("past");
-    expect(passada?.setsDone).toBe(0);
+    const past = buildCalendarWeeks(client()).find((w) => w.offset === -1);
+    expect(past?.state).toBe("past");
+    expect(past?.setsDone).toBe(0);
   });
 
   it("marca semana futura com plano como planejada e informa o plano", () => {
     const c = client({ weekPlans: [{ id: "p1", weekKey: "2026-09-21", days: days() }] });
-    const futura = buildCalendarWeeks(c).find((w) => w.offset === 1);
-    expect(futura?.state).toBe("planned");
-    expect(futura?.planId).toBe("p1");
+    const future = buildCalendarWeeks(c).find((w) => w.offset === 1);
+    expect(future?.state).toBe("planned");
+    expect(future?.planId).toBe("p1");
   });
 
   it("marca semana futura sem plano como vazia", () => {
-    const futura = buildCalendarWeeks(client()).find((w) => w.offset === 1);
-    expect(futura?.state).toBe("empty");
-    expect(futura?.planId).toBeNull();
+    const future = buildCalendarWeeks(client()).find((w) => w.offset === 1);
+    expect(future?.state).toBe("empty");
+    expect(future?.planId).toBeNull();
   });
 
   it("não conta série sem 'feito' como feita na semana passada", () => {

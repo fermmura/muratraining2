@@ -40,9 +40,9 @@ export function buildProgressionRows(history: HistoryEntry[]): ProgressionRow[] 
       row = { key, exName: h.exName, setIndex: h.setIndex, dayTitle: h.dayTitle ?? "", byWeek: new Map() };
       rows.set(key, row);
     }
-    const atual = row.byWeek.get(h.weekKey);
+    const current = row.byWeek.get(h.weekKey);
     // treinou duas vezes na semana, ou corrigiu o número: vale o mais recente
-    if (!atual || (h.dateKey ?? "") >= atual.dateKey) {
+    if (!current || (h.dateKey ?? "") >= current.dateKey) {
       row.byWeek.set(h.weekKey, {
         dateKey: h.dateKey ?? "",
         repsGoal: h.repsGoal ?? "",

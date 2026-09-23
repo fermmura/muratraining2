@@ -26,9 +26,9 @@ describe("mergeHistory", () => {
 
   it("na duplicata, o documento vence o arquivo", () => {
     // o documento é o que os dois apps escrevem hoje; o arquivo é cópia de ontem
-    const doDocumento = entry({ load: "35" });
-    const doArquivo = entry({ load: "30" });
-    expect(mergeHistory([doDocumento], [doArquivo])[0].load).toBe("35");
+    const fromDoc = entry({ load: "35" });
+    const fromArchive = entry({ load: "30" });
+    expect(mergeHistory([fromDoc], [fromArchive])[0].load).toBe("35");
   });
 
   it("mantém a mesma série em dias diferentes", () => {
@@ -38,9 +38,9 @@ describe("mergeHistory", () => {
   });
 
   it("devolve em ordem crescente de data", () => {
-    const antiga = entry({ setId: "s9", dateKey: "2020-01-06", weekKey: "2020-01-06" });
-    const nova = entry({ setId: "s1", dateKey: "2026-09-15" });
-    expect(mergeHistory([nova], [antiga]).map((h) => h.dateKey)).toEqual(["2020-01-06", "2026-09-15"]);
+    const older = entry({ setId: "s9", dateKey: "2020-01-06", weekKey: "2020-01-06" });
+    const newer = entry({ setId: "s1", dateKey: "2026-09-15" });
+    expect(mergeHistory([newer], [older]).map((h) => h.dateKey)).toEqual(["2020-01-06", "2026-09-15"]);
   });
 
   it("aceita arquivo vazio", () => {

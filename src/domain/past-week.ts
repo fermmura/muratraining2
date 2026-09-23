@@ -28,32 +28,32 @@ export interface PastDay {
  * entre si, mas o nome é o que continua legível para quem lê a tela.
  */
 export function groupWeekByDay(history: HistoryEntry[], weekKey: string): PastDay[] {
-  const dias = new Map<string, Map<string, Map<number, HistoryEntry>>>();
+  const dayMap = new Map<string, Map<string, Map<number, HistoryEntry>>>();
 
   for (const h of history) {
     if (h.weekKey !== weekKey) continue;
     const dayTitle = h.dayTitle || "Treino";
     const exName = h.exName || "Exercício";
 
-    let exercicios = dias.get(dayTitle);
-    if (!exercicios) dias.set(dayTitle, (exercicios = new Map()));
+    let exerciseMap = dayMap.get(dayTitle);
+    if (!exerciseMap) dayMap.set(dayTitle, (exerciseMap = new Map()));
 
-    let series = exercicios.get(exName);
-    if (!series) exercicios.set(exName, (series = new Map()));
+    let setMap = exerciseMap.get(exName);
+    if (!setMap) exerciseMap.set(exName, (setMap = new Map()));
 
-    const atual = series.get(h.setIndex);
-    if (!atual || (h.dateKey ?? "") >= (atual.dateKey ?? "")) series.set(h.setIndex, h);
+    const current = setMap.get(h.setIndex);
+    if (!current || (h.dateKey ?? "") >= (current.dateKey ?? "")) setMap.set(h.setIndex, h);
   }
 
-  return [...dias.entries()]
+  return [...dayMap.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([dayTitle, exercicios]) => ({
+    .map(([dayTitle, exerciseMap]) => ({
       dayTitle,
-      exercises: [...exercicios.entries()]
+      exercises: [...exerciseMap.entries()]
         .sort(([a], [b]) => a.localeCompare(b))
-        .map(([exName, series]) => ({
+        .map(([exName, setMap]) => ({
           exName,
-          sets: [...series.values()]
+          sets: [...setMap.values()]
             .sort((a, b) => a.setIndex - b.setIndex)
             .map((h) => ({
               setIndex: h.setIndex,
