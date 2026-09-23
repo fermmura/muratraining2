@@ -45,3 +45,30 @@ describe("state", () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("estado da fase 2", () => {
+  it("começa na grade de treinos", () => {
+    expect(getState().screen).toBe("home");
+  });
+
+  it("começa editando o treino atual", () => {
+    expect(getState().editTarget).toEqual({ kind: "current" });
+  });
+
+  it("começa sem arquivo carregado", () => {
+    expect(getState().archivedHistory).toBeNull();
+    expect(getState().archiveState).toBe("idle");
+  });
+
+  it("troca o alvo de edição para um plano", () => {
+    setState({ editTarget: { kind: "plan", planId: "p1" } });
+    expect(getState().editTarget).toEqual({ kind: "plan", planId: "p1" });
+  });
+
+  it("volta ao estado inicial no reset", () => {
+    setState({ screen: "progression", pastWeekKey: "2026-09-07" });
+    resetState();
+    expect(getState().screen).toBe("home");
+    expect(getState().pastWeekKey).toBeNull();
+  });
+});

@@ -80,6 +80,11 @@ export function buildCalendarWeeks(client: Client): CalendarWeek[] {
  * A semana marcada como ativa não é a de hoje. Acontece com relógio errado no
  * aparelho ou com aluno que ficou semanas sem abrir o app. A tela oferece
  * corrigir, como no 1.0.
+ *
+ * Comparação deliberadamente sobre o valor CRU de `activeWeekKey`, sem passar
+ * por `weekKeyOf` como em `buildCalendarWeeks`: normalizar aqui esconderia
+ * justamente o caso que este aviso existe para pegar — uma chave gravada fora
+ * da segunda-feira, que o treinador precisa corrigir.
  */
 export function isWeekOutOfSync(client: Client, currentWeekKey: string): boolean {
   if (!client.activeWeekKey) return false;
