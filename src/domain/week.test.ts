@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { localDateKey, todayKey, weekKeyOf, addWeeks } from "./week";
+import { localDateKey, todayKey, weekKeyOf, addWeeks, weekLabel, weekRangeLabel } from "./week";
 
 describe("ambiente de teste", () => {
   it("roda no fuso de São Paulo (pré-requisito dos testes de data)", () => {
@@ -59,5 +59,34 @@ describe("addWeeks", () => {
 describe("todayKey", () => {
   it("bate com localDateKey de agora", () => {
     expect(todayKey()).toBe(localDateKey(new Date()));
+  });
+});
+
+describe("weekLabel", () => {
+  it("formata dia e mês abreviado em português", () => {
+    expect(weekLabel("2026-09-14")).toBe("14/set");
+  });
+
+  it("mantém o zero à esquerda no dia", () => {
+    expect(weekLabel("2026-10-05")).toBe("05/out");
+  });
+
+  it("usa o dia local, não o UTC", () => {
+    // sem o T00:00:00 local, 01/01 vira 31/12 do ano anterior no fuso do Brasil
+    expect(weekLabel("2027-01-01")).toBe("01/jan");
+  });
+});
+
+describe("weekRangeLabel", () => {
+  it("vai da segunda ao domingo da mesma semana", () => {
+    expect(weekRangeLabel("2026-09-14")).toBe("14/set a 20/set");
+  });
+
+  it("atravessa virada de mês", () => {
+    expect(weekRangeLabel("2026-09-28")).toBe("28/set a 04/out");
+  });
+
+  it("atravessa virada de ano", () => {
+    expect(weekRangeLabel("2026-12-28")).toBe("28/dez a 03/jan");
   });
 });

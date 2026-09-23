@@ -29,3 +29,18 @@ export function addWeeks(weekKey: string, count: number): string {
   d.setDate(d.getDate() + count * 7);
   return localDateKey(d);
 }
+
+const MONTHS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+
+/** "14/set". O `T00:00:00` força interpretação local; sem ele a data vira UTC. */
+export function weekLabel(weekKey: string): string {
+  const d = new Date(weekKey + "T00:00:00");
+  return `${String(d.getDate()).padStart(2, "0")}/${MONTHS[d.getMonth()]}`;
+}
+
+/** "14/set a 20/set": da segunda ao domingo daquela semana. */
+export function weekRangeLabel(weekKey: string): string {
+  const end = new Date(weekKey + "T00:00:00");
+  end.setDate(end.getDate() + 6);
+  return `${weekLabel(weekKey)} a ${weekLabel(localDateKey(end))}`;
+}
