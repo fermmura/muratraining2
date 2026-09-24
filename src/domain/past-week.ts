@@ -29,11 +29,17 @@ export interface PastDay {
  */
 export function groupWeekByDay(history: HistoryEntry[], weekKey: string): PastDay[] {
   const dayMap = new Map<string, Map<string, Map<number, HistoryEntry>>>();
+  /** Data em que cada dia começou a ser treinado, para ordenar a semana. */
+  const firstDate = new Map<string, string>();
 
   for (const h of history) {
     if (h.weekKey !== weekKey) continue;
     const dayTitle = h.dayTitle || "Treino";
     const exName = h.exName || "Exercício";
+
+    const seen = firstDate.get(dayTitle);
+    const date = h.dateKey ?? "";
+    if (seen === undefined || date < seen) firstDate.set(dayTitle, date);
 
     let exerciseMap = dayMap.get(dayTitle);
     if (!exerciseMap) dayMap.set(dayTitle, (exerciseMap = new Map()));
@@ -45,8 +51,11 @@ export function groupWeekByDay(history: HistoryEntry[], weekKey: string): PastDa
     if (!current || (h.dateKey ?? "") >= (current.dateKey ?? "")) setMap.set(h.setIndex, h);
   }
 
+  // Ordem cronológica: a semana se lê como foi vivida. O título só desempata,
+  // porque dois treinos podem cair no mesmo dia.
   return [...dayMap.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) =>
+      (firstDate.get(a) ?? "").localeCompare(firstDate.get(b) ?? "") || a.localeCompare(b))
     .map(([dayTitle, exerciseMap]) => ({
       dayTitle,
       exercises: [...exerciseMap.entries()]

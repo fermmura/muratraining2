@@ -57,4 +57,38 @@ describe("groupWeekByDay", () => {
   it("devolve lista vazia sem histórico", () => {
     expect(groupWeekByDay([], "2026-09-14")).toEqual([]);
   });
+
+  it("ordena os dias pela data treinada, e não pelo título", () => {
+    const result = groupWeekByDay(
+      [
+        entry({ dayTitle: "Cardio", dateKey: "2026-09-16", setId: "s9" }),
+        entry({ dayTitle: "Lower1", dateKey: "2026-09-14", setId: "s8" }),
+      ],
+      "2026-09-14",
+    );
+    expect(result.map((d) => d.dayTitle)).toEqual(["Lower1", "Cardio"]);
+  });
+
+  it("um dia treinado em datas diferentes entra pela primeira delas", () => {
+    const result = groupWeekByDay(
+      [
+        entry({ dayTitle: "Upper", dateKey: "2026-09-18", setId: "s1" }),
+        entry({ dayTitle: "Upper", dateKey: "2026-09-15", setId: "s2", setIndex: 1 }),
+        entry({ dayTitle: "Lower", dateKey: "2026-09-16", setId: "s3" }),
+      ],
+      "2026-09-14",
+    );
+    expect(result.map((d) => d.dayTitle)).toEqual(["Upper", "Lower"]);
+  });
+
+  it("desempata pelo título quando os dias têm a mesma data", () => {
+    const result = groupWeekByDay(
+      [
+        entry({ dayTitle: "Peito", setId: "s1" }),
+        entry({ dayTitle: "Costas", setId: "s2" }),
+      ],
+      "2026-09-14",
+    );
+    expect(result.map((d) => d.dayTitle)).toEqual(["Costas", "Peito"]);
+  });
 });
