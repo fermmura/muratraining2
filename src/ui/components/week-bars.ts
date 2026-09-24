@@ -1,4 +1,4 @@
-import { html, type TemplateResult } from "lit-html";
+import { html, svg, type TemplateResult } from "lit-html";
 import { weekLabel } from "@/domain/week";
 
 export const CHART_HEIGHT = 160;
@@ -63,7 +63,7 @@ export function weekBars(
            aria-label="Séries feitas por semana">
         <line x1="0" y1=${CHART_HEIGHT} x2=${CHART_WIDTH} y2=${CHART_HEIGHT} class="chart-axis" />
         ${bars.map(
-          (b) => html`
+          (b) => svg`
             <rect class="chart-bar ${b.weekKey === selectedWeek ? "selected" : ""}"
                   x=${b.x} y=${b.y} width=${b.width} height=${b.height}
                   rx="3" @click=${() => onSelect(b.weekKey)}>
@@ -74,7 +74,7 @@ export function weekBars(
                   @click=${() => onSelect(b.weekKey)}></rect>`,
         )}
         ${bars.length
-          ? html`
+          ? svg`
               <text x="0" y=${CHART_HEIGHT + 14} class="chart-tick">${weekLabel(bars[0].weekKey)}</text>
               <text x=${CHART_WIDTH} y=${CHART_HEIGHT + 14} text-anchor="end" class="chart-tick">
                 ${weekLabel(bars[bars.length - 1].weekKey)}

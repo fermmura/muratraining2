@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { layoutBars, CHART_HEIGHT } from "./week-bars";
+import { layoutBars, weekBars, CHART_HEIGHT } from "./week-bars";
 
 const counts = [
   { weekKey: "2026-09-07", count: 10 },
@@ -42,5 +42,39 @@ describe("layoutBars", () => {
     const bars = layoutBars([{ weekKey: "2026-09-07", count: 0 }], 300, CHART_HEIGHT);
     expect(bars[0].height).toBe(0);
     expect(Number.isNaN(bars[0].y)).toBe(false);
+  });
+});
+
+/**
+ * Cada template do lit-html é parseado isolado: um `<rect>` escrito com o tag
+ * `html` vira HTMLUnknownElement e não desenha nada, mesmo aninhado dentro do
+ * `<svg>`. Só o tag `svg` dá o namespace certo. O defeito não gera exceção — o
+ * gráfico simplesmente some —, então fica travado aqui.
+ *
+ * Sem DOM no ambiente de teste, a checagem é na marca que o lit põe no
+ * template: `_$litType$` é 1 para html e 2 para svg.
+ */
+describe("weekBars", () => {
+  interface LitTemplate { _$litType$: number; strings: readonly string[]; values: unknown[] }
+
+  function isTemplate(v: unknown): v is LitTemplate {
+    return typeof v === "object" && v !== null && "_$litType$" in v;
+  }
+
+  function collect(v: unknown, found: LitTemplate[] = []): LitTemplate[] {
+    if (Array.isArray(v)) for (const item of v) collect(item, found);
+    else if (isTemplate(v)) {
+      found.push(v);
+      for (const value of v.values) collect(value, found);
+    }
+    return found;
+  }
+
+  it("desenha rect e text com o tag svg, e não com o tag html", () => {
+    const templates = collect(weekBars(counts, null, () => {}));
+    const svgTags = templates.filter((t) => /<(rect|text)\b/.test(t.strings.join("")));
+
+    expect(svgTags.length).toBeGreaterThan(0);
+    for (const t of svgTags) expect(t._$litType$).toBe(2);
   });
 });
