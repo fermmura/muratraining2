@@ -17,9 +17,24 @@ export interface ProgressionHandlers {
 /** Quantas semanas cabem na tabela sem precisar rolar até o fim do mundo. */
 const VISIBLE_WEEKS = 8;
 
-function cellLabel(cell: ProgressionCell): string {
-  const reps = cell.repsDone || cell.repsGoal || "-";
-  return cell.load ? `${reps}r · ${cell.load}kg` : `${reps}r`;
+/** "40" vira "40kg"; "corpo" fica "corpo". A carga é campo livre — o aluno
+    escreve peso, "corpo" ou "elástico" —, então só número recebe unidade. */
+function loadLabel(load: string): string {
+  return /^[\d.,]+$/.test(load) ? `${load}kg` : load;
+}
+
+/** "9" vira "9r"; "6-10r" fica como está, porque a meta já costuma trazer o r. */
+function repsLabel(reps: string): string {
+  return /r$/i.test(reps) ? reps : `${reps}r`;
+}
+
+export function cellLabel(cell: ProgressionCell): string {
+  const raw = (cell.repsDone || cell.repsGoal).trim();
+  const load = cell.load.trim();
+  const reps = raw ? repsLabel(raw) : "";
+  const weight = load ? loadLabel(load) : "";
+  if (reps && weight) return `${reps} · ${weight}`;
+  return reps || weight || "—";
 }
 
 function tableView(history: HistoryEntry[]): TemplateResult {
