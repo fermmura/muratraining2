@@ -6,7 +6,10 @@ import { studentView } from "./views/student";
 import { calendarView } from "./views/calendar";
 import { pastWeekView } from "./views/past-week";
 import { progressionView } from "./views/progression";
+import { cardioView } from "./views/cardio";
+import { feedbackView } from "./views/feedback";
 import { dayView } from "./components/day";
+import { errorBanner } from "./components/error-banner";
 import { weekRangeLabel, todayKey, weekKeyOf } from "@/domain/week";
 import { isWeekOutOfSync } from "@/domain/calendar";
 import * as handlers from "./handlers";
@@ -14,7 +17,7 @@ import type { Client } from "@/data/schema";
 
 const root = document.getElementById("app")!;
 
-/** As telas da fase 2, comuns ao treinador e ao aluno. Devolve null na grade normal. */
+/** As telas fora da grade de treinos, comuns ao treinador e ao aluno. Devolve null na grade normal. */
 function screenTemplate(client: Client, editable: boolean): TemplateResult | null {
   const s = getState();
 
@@ -41,6 +44,15 @@ function screenTemplate(client: Client, editable: boolean): TemplateResult | nul
       s.archiveState,
       { ...handlers.screens, onBack: handlers.screens.onBackHome },
     );
+  }
+
+  if (s.screen === "cardio") {
+    return cardioView(client.cardio ?? [], todayKey(), handlers.cardio);
+  }
+
+  if (s.screen === "feedback") {
+    // só o treinador apaga mensagem, como no 1.0
+    return feedbackView(client.feedback ?? [], handlers.me(), editable, handlers.feedback);
   }
 
   return null;
@@ -79,6 +91,13 @@ function homeTemplate(client: Client, editable: boolean): TemplateResult {
       <button class="dashed-btn" @click=${handlers.screens.onOpenProgression}>
         <i class="ti ti-chart-line"></i> Progressão
       </button>
+      <button class="dashed-btn" @click=${handlers.cardio.onOpen}>
+        <i class="ti ti-heart-rate-monitor"></i> Cardio
+      </button>
+      <button class="dashed-btn" @click=${handlers.feedback.onOpen}>
+        <i class="ti ti-message-circle"></i> Feedbacks
+        ${handlers.feedback.hasUnread() ? html`<span class="unread-dot" aria-label="mensagem nova"></span>` : null}
+      </button>
     </div>
     <!-- os dias vêm do alvo de edição: do treino corrente ou do plano aberto -->
     ${editable
@@ -104,7 +123,10 @@ function template() {
       // editable=false: o treinador prescreve a estrutura do treino; o aluno
       // registra. "feito" e "kg" continuam editáveis porque set-row não os
       // condiciona a `editable`.
-      return screenTemplate(s.client, false) ?? homeTemplate(s.client, false);
+      return html`
+        ${errorBanner(s.error, handlers.student.onDismissError)}
+        ${screenTemplate(s.client, false) ?? homeTemplate(s.client, false)}
+      `;
     }
   }
 }
