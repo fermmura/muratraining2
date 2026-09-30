@@ -7,6 +7,8 @@ import { todayKey, weekKeyOf } from "@/domain/week";
 import { loadAllArchived, loadArchivedWeek } from "@/data/history-archive";
 import { currentClient, persist } from "./target";
 import { resetScreen } from "./trainer";
+import { photoCopies } from "@/domain/photo-copy";
+import { copyPlanPhotos } from "./photos";
 import type { CalendarWeek } from "@/domain/calendar";
 import type { HistoryEntry } from "@/data/schema";
 
@@ -93,6 +95,8 @@ export const screens = {
     if (!c) return;
     const plan = createPlan(c, weekKey, mode);
     persist(c.id, { weekPlans: [...(c.weekPlans ?? []), plan] });
+    // o plano aparece na hora; as fotos chegam em seguida, uma leitura e uma escrita cada
+    if (mode === "copy") void copyPlanPhotos(c.id, plan.id, photoCopies(c.days ?? [], plan.days));
     setState({
       screen: "home",
       editTarget: { kind: "plan", planId: plan.id },

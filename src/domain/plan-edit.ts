@@ -13,8 +13,9 @@ import type { Client, Day, WeekPlan } from "@/data/schema";
  * errado virava um plano que seria promovido sozinho quando a semana chegasse.
  * Aqui a escolha é explícita e nada é gravado antes dela.
  *
- * Fotos de exercício são da fase 3 e por isso não são copiadas: os exercícios
- * da cópia chegam sem `hasPhoto`.
+ * A cópia chega sem `hasPhoto`: a foto mora no id antigo do exercício. Quem cria
+ * o plano copia as fotos depois (ver `copyPlanPhotos`) e marca os exercícios cuja
+ * cópia deu certo.
  */
 export function createPlan(client: Client, weekKey: string, mode: "copy" | "empty"): WeekPlan {
   return {
