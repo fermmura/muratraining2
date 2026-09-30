@@ -4,7 +4,7 @@ import type { Session } from "@/auth/session";
 export type View = "loading" | "gate" | "trainer" | "student";
 
 /** Tela aberta dentro da área do aluno. `home` é a grade de treinos da fase 1. */
-export type Screen = "home" | "calendar" | "pastWeek" | "progression" | "cardio" | "feedback";
+export type Screen = "home" | "calendar" | "pastWeek" | "progression" | "cardio" | "feedback" | "muscle";
 
 /**
  * Onde a edição de treino grava. A mesma tela serve ao treino corrente e ao

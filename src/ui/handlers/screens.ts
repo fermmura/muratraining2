@@ -42,6 +42,9 @@ export const screens = {
   onOpenCalendar: () => setState({ screen: "calendar", activeDayId: null, planChoiceWeekKey: null }),
   onOpenProgression: () => setState({ screen: "progression", activeDayId: null }),
   onBackHome: () => resetScreen(),
+  onOpenMuscle: () => setState({ screen: "muscle", activeDayId: null }),
+  // volta sem resetar o alvo: quem abriu o volume de dentro de um plano volta ao plano
+  onCloseMuscle: () => setState({ screen: "home" }),
 
   onTab: (progTab: "overall" | "table") => setState({ progTab, progSelectedWeek: null }),
   onSelectWeek: (progSelectedWeek: string) => setState({ progSelectedWeek }),

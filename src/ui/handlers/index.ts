@@ -4,3 +4,4 @@ export { day } from "./workout";
 export { screens, visibleHistory } from "./screens";
 export { cardio } from "./cardio";
 export { feedback, me } from "./feedback";
+export { editableDays } from "./target";

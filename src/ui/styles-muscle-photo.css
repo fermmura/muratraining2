@@ -15,3 +15,15 @@
 .muscle-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 .muscle-pill { font-size: 11px; border: 1px solid var(--line); border-radius: 20px; padding: 2px 8px; color: var(--muted); }
 .muscle-pill b { color: var(--chalk); font-weight: 600; }
+
+/* tela de volume */
+.volume-intro { margin-bottom: 18px; }
+.volume-list { display: flex; flex-direction: column; gap: 16px; }
+.volume-row-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px;
+  font-size: 14px; font-weight: 600; }
+.volume-row-head .muted-note { font-size: 12px; font-weight: 400; }
+.volume-bar { position: relative; height: 16px; overflow: hidden; background: var(--panelAlt);
+  border: 1px solid var(--line); border-radius: 8px; }
+.volume-bar-total, .volume-bar-done { position: absolute; top: 0; left: 0; height: 100%; }
+.volume-bar-total { background: var(--line); }
+.volume-bar-done { background: var(--red); }

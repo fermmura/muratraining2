@@ -8,6 +8,8 @@ import { pastWeekView } from "./views/past-week";
 import { progressionView } from "./views/progression";
 import { cardioView } from "./views/cardio";
 import { feedbackView } from "./views/feedback";
+import { muscleVolumeView } from "./views/muscle-volume";
+import { muscleVolume } from "@/domain/muscle";
 import { dayView } from "./components/day";
 import { errorBanner } from "./components/error-banner";
 import { weekRangeLabel, todayKey, weekKeyOf } from "@/domain/week";
@@ -55,6 +57,11 @@ function screenTemplate(client: Client, editable: boolean): TemplateResult | nul
     return feedbackView(client.feedback ?? [], handlers.me(), editable, handlers.feedback);
   }
 
+  if (s.screen === "muscle") {
+    // os dias do alvo de edição: com um plano aberto, é o volume do plano
+    return muscleVolumeView(muscleVolume(handlers.editableDays(client)), handlers.screens.onCloseMuscle);
+  }
+
   return null;
 }
 
@@ -94,6 +101,11 @@ function homeTemplate(client: Client, editable: boolean): TemplateResult {
       <button class="dashed-btn" @click=${handlers.cardio.onOpen}>
         <i class="ti ti-heart-rate-monitor"></i> Cardio
       </button>
+      ${editable
+        ? html`<button class="dashed-btn" @click=${handlers.screens.onOpenMuscle}>
+            <i class="ti ti-chart-donut-3"></i> Volume muscular
+          </button>`
+        : null}
       <button class="dashed-btn" @click=${handlers.feedback.onOpen}>
         <i class="ti ti-message-circle"></i> Feedbacks
         ${handlers.feedback.hasUnread() ? html`<span class="unread-dot" aria-label="mensagem nova"></span>` : null}
