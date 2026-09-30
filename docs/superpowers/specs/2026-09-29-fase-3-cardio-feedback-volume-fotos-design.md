@@ -143,7 +143,7 @@ Módulos novos em `domain/`, puros, como nas fases anteriores:
   positivo ou null; `cardioTotals(entradas, desdeDateKey)`; `monthStartKey(dateKey)`;
   `newestFirst(entradas)`. Minutos gravados pelo 1.0 podem vir como texto, então a soma
   converte e ignora o que não é número.
-- **`feedback.ts`** (3a) — `authorOf(view)`, que traduz a sessão em `"aluno"` ou
+- **`feedback.ts`** (3a) — `authorOf(isTrainer)`, que traduz a sessão em `"aluno"` ou
   `"treinador"`; `hasUnreadFor(entradas, eu)`; `markReadFor(entradas, eu)`, que devolve
   null quando não há o que marcar, para não gerar escrita; `oldestFirst(entradas)`.
 - **`muscle.ts`** (3b) — `MUSCLE_GROUPS`, `guessMuscle`, `guessSynergist`,
