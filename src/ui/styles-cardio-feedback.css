@@ -1,0 +1,54 @@
+/* Fase 3a: cardio, feedbacks e o aviso de erro do aluno. Arquivo à parte porque
+   styles.css já passou do limite de tamanho. */
+
+.section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--muted); margin: 18px 0 8px; }
+
+/* cardio */
+.cardio-totals { display: flex; gap: 10px; margin-bottom: 16px; }
+.cardio-box { flex: 1; background: var(--panelAlt); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.cardio-box-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.cardio-box-total { font-size: 24px; margin-top: 2px; }
+.cardio-zones { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.cardio-zone { font-size: 11px; border: 1px solid var(--line); border-radius: 20px; padding: 2px 8px; color: var(--muted); }
+.cardio-zone.Z2 { color: var(--steel); }
+.cardio-zone.Z3 { color: var(--plate); }
+.cardio-zone.Z4 { color: #E8875A; }
+.cardio-zone.Z5 { color: var(--red); }
+
+.cardio-form, .chat-form { display: flex; flex-direction: column; gap: 8px; background: var(--panelAlt);
+  border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.cardio-form-row { display: flex; gap: 8px; }
+.cardio-form input, .cardio-form select, .cardio-form textarea, .chat-form textarea {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; color: var(--chalk);
+  font: inherit; font-size: 14px; }
+.cardio-form input { width: 90px; text-align: center; }
+.cardio-form select { flex: 1; min-width: 0; }
+.cardio-form textarea, .chat-form textarea { resize: none; }
+.cardio-form .dashed-btn, .chat-form .dashed-btn { justify-content: center; }
+
+.cardio-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+.cardio-row > .ti { color: var(--muted); font-size: 16px; }
+.cardio-row-text { flex: 1; min-width: 0; font-size: 13px; overflow-wrap: anywhere; }
+.cardio-row-date { font-size: 11px; color: var(--muted); }
+
+/* feedbacks */
+.whatsapp-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px;
+  background: #1F3A26; border: 1px solid #2E7D46; color: #9BE3B0; border-radius: 10px; padding: 12px;
+  text-decoration: none; font-weight: 600; }
+.chat { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.bubble { max-width: 85%; border-radius: 12px; padding: 8px 12px; border: 1px solid var(--line); background: var(--panelAlt); }
+.bubble.mine { align-self: flex-end; background: var(--redDim); border-color: var(--red); }
+.bubble.theirs { align-self: flex-start; }
+.bubble-meta { font-size: 10px; color: var(--muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: .03em; }
+.bubble-text { font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bubble .rm-x { margin-top: 4px; font-size: 12px; }
+
+/* ponto de mensagem não lida no botão de feedbacks */
+.unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); display: inline-block; }
+
+/* aviso de erro do aluno */
+.error-banner { display: flex; align-items: flex-start; gap: 10px; background: var(--redDim);
+  border: 1px solid var(--red); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 13px; }
+.error-banner span { flex: 1; }
+.error-banner button { color: var(--chalk); }
