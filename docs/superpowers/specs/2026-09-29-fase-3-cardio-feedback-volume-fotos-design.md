@@ -160,10 +160,10 @@ Módulos novos em `domain/`, puros, como nas fases anteriores:
 - **`schema.ts`** ganha o tipo `FeedbackEntry = { id, dateKey, from: "aluno" |
   "treinador", text, read }` e troca `feedback?: unknown[]` por `feedback?:
   FeedbackEntry[]`. É só tipagem do que o 1.0 já grava.
-- **`data/photos.ts`** (3b) — `loadPhoto`, `savePhoto`, `deletePhoto` e `copyPhoto`. A
-  leitura guarda a **promessa** num cache em memória por `clientId:exId`, de modo que
-  redesenhar a tela não refaz a leitura e o `until` do lit-html recebe sempre a mesma
-  promessa.
+- **`data/photos.ts`** (3b) — `loadPhoto`, `savePhoto` e `deletePhoto`, finos sobre o
+  Firestore. A foto carregada fica no estado (ver "Estado"), e não numa promessa
+  resolvida a cada render: com o `until` do lit-html, cada redesenho — um por série
+  digitada — recriaria o `<img>` e decodificaria de novo uma imagem de até 500KB.
 - **`ui/image.ts`** (3b) — `compressImage(arquivo, maxLado, qualidade)`, com canvas.
   Depende do navegador e por isso fica fora de `domain/`.
 
@@ -175,8 +175,19 @@ quem cria o plano que as copia.
 
 ### Estado
 
-`Screen` ganha `"cardio"`, `"feedback"` e `"muscle"`. Na 3b, `photoViewer: string | null`
-guarda a foto aberta em tela cheia.
+`Screen` ganha `"cardio"`, `"feedback"` e `"muscle"`. Na 3b, `photos: ReadonlyMap<string,
+string | null>` guarda as fotos já lidas por id de exercício — `null` quando o documento
+não existe —, `photoViewer: string | null` guarda a foto aberta em tela cheia e
+`updateReady: boolean` diz que há versão nova do app esperando.
+
+### Aviso de versão nova (3b)
+
+Achado durante a 3a: o `vite-plugin-pwa` está em `registerType: "prompt"`, escolhido para
+não recarregar o app no meio de uma série, mas nenhuma tela mostra o prompt. O app
+instalado no celular fica em segundo plano e pode rodar a versão antiga por dias. A 3b
+registra o service worker por `virtual:pwa-register`, mostra uma faixa "Nova versão
+disponível — atualizar" quando há versão esperando, e verifica se há versão nova a cada
+hora. Quem decide a hora de recarregar continua sendo quem está usando.
 
 ### Arquivos menores
 
