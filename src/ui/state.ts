@@ -37,6 +37,10 @@ export interface AppState {
   archiveState: "idle" | "loading" | "loaded" | "error";
   /** Semana futura à espera da escolha entre copiar e começar do zero. */
   planChoiceWeekKey: string | null;
+  /** Fotos já lidas, por id de exercício. null = o documento da foto não existe. */
+  photos: ReadonlyMap<string, string | null>;
+  /** Foto aberta em tela cheia. */
+  photoViewer: string | null;
 }
 
 const INITIAL: AppState = {
@@ -57,6 +61,8 @@ const INITIAL: AppState = {
   archivedHistory: null,
   archiveState: "idle",
   planChoiceWeekKey: null,
+  photos: new Map<string, string | null>(),
+  photoViewer: null,
 };
 
 let state: AppState = { ...INITIAL };
