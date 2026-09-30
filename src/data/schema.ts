@@ -68,6 +68,17 @@ export interface CardioEntry {
   note: string;
 }
 
+export type FeedbackAuthor = "aluno" | "treinador";
+
+export interface FeedbackEntry {
+  id: string;
+  dateKey: string;
+  from: FeedbackAuthor;
+  text: string;
+  /** Lida pelo destinatário, que é sempre quem não escreveu a mensagem. */
+  read: boolean;
+}
+
 export interface Client {
   /** Id do documento, que é o UID do Firebase Auth. Não é campo gravado. */
   id: string;
@@ -81,7 +92,7 @@ export interface Client {
   weekPlans?: WeekPlan[];
   history?: HistoryEntry[];
   cardio?: CardioEntry[];
-  feedback?: unknown[];
+  feedback?: FeedbackEntry[];
   workoutSessions?: unknown[];
 }
 
