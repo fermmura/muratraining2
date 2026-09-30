@@ -2,9 +2,10 @@ import { html, type TemplateResult } from "lit-html";
 import { live } from "lit-html/directives/live.js";
 import { setRow, type SetRowHandlers } from "./set-row";
 import { musclePicker, type MuscleHandlers } from "./muscle-picker";
+import { exercisePhoto, type PhotoHandlers } from "./exercise-photo";
 import type { Exercise } from "@/data/schema";
 
-export interface ExerciseHandlers extends SetRowHandlers, MuscleHandlers {
+export interface ExerciseHandlers extends SetRowHandlers, MuscleHandlers, PhotoHandlers {
   onRename: (exId: string, name: string) => void;
   onNotes: (exId: string, notes: string) => void;
   onAddSet: (exId: string) => void;
@@ -37,6 +38,7 @@ export function exerciseCard(
 
       <div class="ex-body ${collapsed ? "hidden" : ""}">
         ${musclePicker(ex, editable, h)}
+        ${exercisePhoto(ex, editable, h)}
         ${ex.notes || editable
           ? html`<div class="notes-box">
               <label>Observações</label>

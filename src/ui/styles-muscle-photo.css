@@ -27,3 +27,18 @@
 .volume-bar-total, .volume-bar-done { position: absolute; top: 0; left: 0; height: 100%; }
 .volume-bar-total { background: var(--line); }
 .volume-bar-done { background: var(--red); }
+
+/* foto no cartão */
+.ex-photo { position: relative; margin-bottom: 10px; }
+.ex-photo img { display: block; width: 100%; max-height: 240px; object-fit: cover; border-radius: 8px;
+  border: 1px solid var(--line); cursor: zoom-in; }
+.ex-photo-remove { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,.6); color: var(--chalk);
+  border-radius: 6px; padding: 4px; }
+.ex-photo-loading { margin-bottom: 10px; font-size: 12px; }
+.photo-add { margin-bottom: 10px; cursor: pointer; }
+
+/* tela cheia */
+.photo-viewer { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.92); display: flex;
+  align-items: center; justify-content: center; padding: 16px; }
+.photo-viewer img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
+.photo-viewer-close { position: absolute; top: 16px; right: 16px; color: var(--chalk); font-size: 22px; }

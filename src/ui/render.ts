@@ -12,6 +12,7 @@ import { muscleVolumeView } from "./views/muscle-volume";
 import { muscleVolume } from "@/domain/muscle";
 import { dayView } from "./components/day";
 import { errorBanner } from "./components/error-banner";
+import { photoViewer } from "./components/photo-viewer";
 import { weekRangeLabel, todayKey, weekKeyOf } from "@/domain/week";
 import { isWeekOutOfSync } from "@/domain/calendar";
 import * as handlers from "./handlers";
@@ -86,7 +87,7 @@ function homeTemplate(client: Client, editable: boolean): TemplateResult {
     : null;
 
   if (day) {
-    return html`${banner}${dayView(day, s.collapsedExercises, editable, !plan, handlers.day)}`;
+    return html`${banner}${dayView(day, s.collapsedExercises, editable, !plan, { ...handlers.day, ...handlers.photos })}`;
   }
 
   return html`
@@ -118,7 +119,7 @@ function homeTemplate(client: Client, editable: boolean): TemplateResult {
   `;
 }
 
-function template() {
+function viewTemplate() {
   const s = getState();
   switch (s.view) {
     case "loading":
@@ -141,6 +142,15 @@ function template() {
       `;
     }
   }
+}
+
+/** Camadas por cima de qualquer tela. */
+function template() {
+  const s = getState();
+  return html`
+    ${viewTemplate()}
+    ${photoViewer(s.photoViewer, handlers.photos.onClosePhoto)}
+  `;
 }
 
 export function renderApp(): void {

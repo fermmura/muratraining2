@@ -4,6 +4,7 @@ import { uid } from "@/data/id";
 import { isTimerRunning } from "../components/timer";
 import { guessedMuscles } from "@/domain/muscle";
 import { currentClient, editableDays, mutateDays, mutateExercise, persist } from "./target";
+import { forgetPhoto } from "./photos";
 
 function newSet() {
   return { id: uid(), repsGoal: "10", repsDone: "", load: "", intensity: 0, rir: "", rirEnabled: false };
@@ -38,10 +39,15 @@ export const day = {
       ),
     ),
 
-  onRemoveExercise: (exId: string) =>
+  onRemoveExercise: (exId: string) => {
+    const c = currentClient();
+    const ex = c && editableDays(c).flatMap((d) => d.exercises ?? []).find((e) => e.id === exId);
+    // cada exercício tem id próprio, então ninguém mais aponta para essa foto
+    if (c && ex) forgetPhoto(c.id, ex);
     mutateDays((days) =>
       days.map((d) => ({ ...d, exercises: (d.exercises ?? []).filter((e) => e.id !== exId) })),
-    ),
+    );
+  },
 
   // com o músculo ainda vazio, adivinha pelo nome, como o 1.0 (app.js:1981-1990)
   onRename: (exId: string, name: string) =>
