@@ -18,17 +18,29 @@ export function cloneDaysWithNewIds(days: Day[], opts: CloneOptions = {}): Day[]
     return {
       ...rest,
       id: uid(),
-      exercises: (d.exercises ?? []).map((ex) => ({
-        ...ex,
-        id: uid(),
-        sets: (ex.sets ?? []).map((s) => ({
-          ...s,
+      exercises: (d.exercises ?? []).map((ex) => {
+        // A foto mora em photos/{id do exercício}. Com id novo ela não vem
+        // junto, e o flag apontaria para um documento que não existe.
+        const { hasPhoto: _hasPhoto, photoUrl: _photoUrl, ...exRest } = ex;
+        return {
+          ...exRest,
           id: uid(),
-          repsDone: "",
-          ...(opts.carryGhost ? { prevReps: s.repsDone || s.prevReps || "" } : {}),
-        })),
-      })),
+          sets: (ex.sets ?? []).map((s) => ({
+            ...s,
+            id: uid(),
+            repsDone: "",
+            ...(opts.carryGhost ? { prevReps: s.repsDone || s.prevReps || "" } : {}),
+          })),
+        };
+      }),
     };
+  });
+}
+
+function withoutTimer(days: Day[]): Day[] {
+  return (days ?? []).map((d) => {
+    const { timerStartedAt: _drop, ...rest } = d;
+    return rest;
   });
 }
 
@@ -67,8 +79,11 @@ export function planPromotion(
     return { days: client.days ?? [], activeWeekKey: currentWeekKey, weekPlans: plans };
   }
 
+  // O plano já nasceu com ids próprios e com a referência da semana anterior.
+  // Os ids ficam, como no 1.0 (app.js:376): as fotos copiadas para o plano
+  // estão indexadas por eles.
   return {
-    days: withRefLoads(client, cloneDaysWithNewIds(plan.days, { carryGhost: true }), plan.weekKey),
+    days: withRefLoads(client, withoutTimer(plan.days), plan.weekKey),
     activeWeekKey: currentWeekKey,
     weekPlans: plans.filter((p) => p.id !== plan.id),
   };

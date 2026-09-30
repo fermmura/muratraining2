@@ -44,6 +44,12 @@ describe("createPlan", () => {
     expect(s.prevReps).toBe("9");
   });
 
+  it("copiando, não marca foto em exercício cujo id mudou", () => {
+    const base = days();
+    base[0].exercises[0] = { ...base[0].exercises[0], hasPhoto: true };
+    expect(createPlan(client({ days: base }), "2026-09-21", "copy").days[0].exercises[0].hasPhoto).toBeUndefined();
+  });
+
   it("copiando, nunca leva o cronômetro junto", () => {
     expect(createPlan(client(), "2026-09-21", "copy").days[0].timerStartedAt).toBeUndefined();
   });

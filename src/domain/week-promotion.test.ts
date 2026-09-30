@@ -49,6 +49,14 @@ describe("cloneDaysWithNewIds", () => {
     expect(s.repsDone).toBe("");
   });
 
+  it("não leva a foto, que mora no id antigo do exercício", () => {
+    const base = days();
+    base[0].exercises[0] = { ...base[0].exercises[0], hasPhoto: true, photoUrl: "data:x" };
+    const ex = cloneDaysWithNewIds(base)[0].exercises[0];
+    expect(ex.hasPhoto).toBeUndefined();
+    expect(ex.photoUrl).toBeUndefined();
+  });
+
   it("mantém a referência antiga quando a série não foi feita", () => {
     const base = days();
     base[0].exercises[0].sets[0] = { ...base[0].exercises[0].sets[0], repsDone: "", prevReps: "7" };
@@ -75,8 +83,17 @@ describe("planPromotion", () => {
     const plano = { id: "p1", weekKey: "2026-09-14", days: days() };
     const r = planPromotion(client({ weekPlans: [plano] }), "2026-09-14");
     expect(r?.weekPlans).toHaveLength(0);
-    expect(r?.days[0].id).not.toBe("d1"); // ids novos
     expect(r?.days[0].timerStartedAt).toBeUndefined();
+  });
+
+  it("promove o plano com os mesmos ids, porque as fotos são indexadas pelo id do exercício", () => {
+    const base = days();
+    base[0].exercises[0] = { ...base[0].exercises[0], hasPhoto: true };
+    const r = planPromotion(client({ weekPlans: [{ id: "p1", weekKey: "2026-09-14", days: base }] }), "2026-09-14");
+    expect(r?.days[0].id).toBe("d1");
+    expect(r?.days[0].exercises[0].id).toBe("e1");
+    expect(r?.days[0].exercises[0].sets[0].id).toBe("s1");
+    expect(r?.days[0].exercises[0].hasPhoto).toBe(true);
   });
 
   it("aplica a última carga feita sobre as séries do plano", () => {
