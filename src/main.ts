@@ -1,6 +1,6 @@
 import "./ui/styles.css";
 import { renderApp } from "./ui/render";
-import { setState } from "./ui/state";
+import { getState, setState } from "./ui/state";
 import { watchSession } from "./auth/session";
 import { subscribeToAllClients, subscribeToClient, saveClient } from "./data/client-repo";
 import { archiveOldHistory } from "./data/history-archive";
@@ -58,7 +58,12 @@ watchSession((session) => {
         });
         return;
       }
-      setState({ view: "student", client, error: null });
+      // Limpa o erro só na chegada à tela do aluno (o da ficha que não existia).
+      // A cada snapshot, não: quando o servidor recusa uma escrita, o SDK desfaz
+      // a alteração local e dispara um snapshot novo, que apagaria o aviso no
+      // mesmo instante em que ele aparece.
+      const arriving = getState().view !== "student";
+      setState({ view: "student", client, ...(arriving ? { error: null } : {}) });
       // virada de semana e arquivo tentam de novo no próximo carregamento
       onClientLoaded(client).catch(() => {});
     },

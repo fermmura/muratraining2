@@ -53,6 +53,7 @@ export const trainer = {
 export const student = {
   onOpenDay: (dayId: string) => setState({ activeDayId: dayId }),
   onLogout: () => void signOutNow(),
+  onDismissError: () => setState({ error: null }),
 };
 
 export function clientSummary(client: Client): TemplateResult {
