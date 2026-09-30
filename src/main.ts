@@ -2,6 +2,7 @@ import "./ui/styles.css";
 import "./ui/styles-cardio-feedback.css";
 import "./ui/styles-muscle-photo.css";
 import { renderApp } from "./ui/render";
+import { startPwa } from "./pwa";
 import { getState, setState } from "./ui/state";
 import { watchSession } from "./auth/session";
 import { subscribeToAllClients, subscribeToClient, saveClient } from "./data/client-repo";
@@ -73,4 +74,5 @@ watchSession((session) => {
   );
 });
 
+startPwa();
 renderApp();

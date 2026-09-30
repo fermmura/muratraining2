@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="vite-plugin-pwa/client" />
 
 // Tipagem das variáveis de ambiente lidas em src/firebase.ts. Sem isto o tsc não
 // conhece `import.meta.env` e o build falha.

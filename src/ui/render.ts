@@ -13,6 +13,8 @@ import { muscleVolume } from "@/domain/muscle";
 import { dayView } from "./components/day";
 import { errorBanner } from "./components/error-banner";
 import { photoViewer } from "./components/photo-viewer";
+import { updateBanner } from "./components/update-banner";
+import { applyUpdate } from "@/pwa";
 import { weekRangeLabel, todayKey, weekKeyOf } from "@/domain/week";
 import { isWeekOutOfSync } from "@/domain/calendar";
 import * as handlers from "./handlers";
@@ -148,6 +150,7 @@ function viewTemplate() {
 function template() {
   const s = getState();
   return html`
+    ${updateBanner(s.updateReady, applyUpdate)}
     ${viewTemplate()}
     ${photoViewer(s.photoViewer, handlers.photos.onClosePhoto)}
   `;

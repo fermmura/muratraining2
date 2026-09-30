@@ -41,6 +41,8 @@ export interface AppState {
   photos: ReadonlyMap<string, string | null>;
   /** Foto aberta em tela cheia. */
   photoViewer: string | null;
+  /** Há uma versão nova do app esperando para ser aplicada. */
+  updateReady: boolean;
 }
 
 const INITIAL: AppState = {
@@ -63,6 +65,7 @@ const INITIAL: AppState = {
   planChoiceWeekKey: null,
   photos: new Map<string, string | null>(),
   photoViewer: null,
+  updateReady: false,
 };
 
 let state: AppState = { ...INITIAL };
