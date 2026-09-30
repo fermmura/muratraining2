@@ -56,8 +56,11 @@ Tomadas na escrita deste design, por delegação do dono do projeto:
 O aluno manda uma mensagem, reabre a tela para conferir, e o aviso de não lida some antes
 de o treinador ver. O campo `read` é um só por mensagem, mas cada mensagem tem um único
 destinatário — quem não a escreveu. O 2.0 marca como lidas só as mensagens do outro lado, e
-o aviso conta só essas. O 1.0 continua com o defeito; como o formato é o mesmo, os dois
-convivem.
+o aviso conta só essas.
+
+A ideia inicial era deixar o 1.0 com o defeito, mas isso não funciona na convivência: o
+teste da 3a mostrou que abrir a conversa no 1.0 apagava o aviso que o 2.0 tinha acabado de
+acender. O 1.0 recebeu a mesma correção (commit `8a8a517` do repositório MuraTraining).
 
 **Foto marcada sem foto existente.** A virada de semana do 2.0 gerava ids novos e levava
 `hasPhoto` junto, apontando para um documento que não existe. A causa foi corrigida no
@@ -196,8 +199,6 @@ formatação; pares de cópia de foto. A interface continua sem teste automatiza
   Feedback depende de quanto se escreve, mas é texto curto. Nenhum dos dois ameaça o teto
   em horizonte de anos, e arquivá-los como o histórico exigiria mudança que o 1.0 não
   entende. Fica registrado para depois da fase 4.
-- **O 1.0 continua marcando tudo como lido.** Quem usar o 1.0 ainda sofre o defeito; o
-  2.0 não piora nada.
 - **Foto antiga embutida no documento.** Alunos muito antigos podem ter `photoUrl` com a
   imagem dentro do próprio exercício. O 2.0 exibe, mas não migra: o 1.0 já migra isso para
   a subcoleção quando o treinador abre a ficha, e fazer de novo aqui é código para um caso
