@@ -1,7 +1,7 @@
 import { getState, setState } from "../state";
 import { saveClient } from "@/data/client-repo";
 import { replacePlanDays } from "@/domain/plan-edit";
-import type { Client, Day } from "@/data/schema";
+import type { Client, Day, Exercise } from "@/data/schema";
 
 /** O aluno em edição: o próprio, ou o selecionado quando quem está logado é o treinador. */
 export function currentClient(): Client | null {
@@ -43,6 +43,16 @@ export function mutateDays(fn: (days: Day[]) => Day[]): void {
   const plan = plans.find((p) => p.id === t.planId);
   if (!plan) return;
   persist(c.id, { weekPlans: replacePlanDays(plans, t.planId, fn(plan.days ?? [])) });
+}
+
+/** Aplica `fn` ao exercício `exId`, em qualquer dia do alvo atual. */
+export function mutateExercise(exId: string, fn: (ex: Exercise) => Exercise): void {
+  mutateDays((days) =>
+    days.map((d) => ({
+      ...d,
+      exercises: (d.exercises ?? []).map((e) => (e.id === exId ? fn(e) : e)),
+    })),
+  );
 }
 
 export function authErrorCode(e: unknown): string {

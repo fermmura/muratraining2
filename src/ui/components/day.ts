@@ -1,6 +1,7 @@
 import { html, type TemplateResult } from "lit-html";
 import { exerciseCard, type ExerciseHandlers } from "./exercise";
 import { timerButton } from "./timer";
+import { dayVolume } from "./day-volume";
 import type { Day } from "@/data/schema";
 
 export interface DayHandlers extends ExerciseHandlers {
@@ -23,6 +24,7 @@ export function dayView(
       <!-- num plano de semana futura não há sessão de treino para cronometrar -->
       ${showTimer ? timerButton(day.timerStartedAt, () => h.onToggleTimer(day.id)) : null}
     </div>
+    ${dayVolume(day)}
 
     ${(day.exercises ?? []).map((ex) => exerciseCard(ex, collapsed.has(ex.id), editable, h))}
 

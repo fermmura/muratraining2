@@ -1,5 +1,6 @@
 import "./ui/styles.css";
 import "./ui/styles-cardio-feedback.css";
+import "./ui/styles-muscle-photo.css";
 import { renderApp } from "./ui/render";
 import { getState, setState } from "./ui/state";
 import { watchSession } from "./auth/session";

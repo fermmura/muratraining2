@@ -2,7 +2,8 @@ import { getState, setState } from "../state";
 import { applySetFieldChange, setFieldInDays } from "@/domain/history";
 import { uid } from "@/data/id";
 import { isTimerRunning } from "../components/timer";
-import { currentClient, editableDays, mutateDays, persist } from "./target";
+import { guessedMuscles } from "@/domain/muscle";
+import { currentClient, editableDays, mutateDays, mutateExercise, persist } from "./target";
 
 function newSet() {
   return { id: uid(), repsGoal: "10", repsDone: "", load: "", intensity: 0, rir: "", rirEnabled: false };
@@ -42,13 +43,12 @@ export const day = {
       days.map((d) => ({ ...d, exercises: (d.exercises ?? []).filter((e) => e.id !== exId) })),
     ),
 
+  // com o músculo ainda vazio, adivinha pelo nome, como o 1.0 (app.js:1981-1990)
   onRename: (exId: string, name: string) =>
-    mutateDays((days) =>
-      days.map((d) => ({
-        ...d,
-        exercises: (d.exercises ?? []).map((e) => (e.id === exId ? { ...e, name } : e)),
-      })),
-    ),
+    mutateExercise(exId, (e) => ({ ...e, name, ...guessedMuscles(e, name) })),
+
+  onMuscle: (exId: string, field: "muscle" | "synergist", value: string) =>
+    mutateExercise(exId, (e) => ({ ...e, [field]: value })),
 
   onNotes: (exId: string, notes: string) =>
     mutateDays((days) =>

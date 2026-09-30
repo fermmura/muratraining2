@@ -1,0 +1,17 @@
+/* Fase 3b: músculo, volume, fotos e aviso de versão nova. */
+
+/* músculo no cartão */
+.muscle-picker { display: flex; gap: 6px; margin-bottom: 10px; }
+.muscle-picker select { flex: 1; min-width: 0; background: var(--panelAlt); border: 1px solid var(--line);
+  border-radius: 6px; padding: 6px; color: var(--chalk); font: inherit; font-size: 13px; }
+.muscle-picker select.synergist { color: var(--muted); }
+.muscle-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.muscle-tag { font-size: 11px; border: 1px solid var(--line); border-radius: 20px; padding: 2px 8px; color: var(--chalk); }
+.muscle-tag.synergist { opacity: .6; }
+
+/* volume no cabeçalho do dia */
+.day-volume { color: var(--muted); font-size: 13px; margin: -10px 0 8px; }
+.day-volume.complete { color: var(--green); }
+.muscle-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.muscle-pill { font-size: 11px; border: 1px solid var(--line); border-radius: 20px; padding: 2px 8px; color: var(--muted); }
+.muscle-pill b { color: var(--chalk); font-weight: 600; }
