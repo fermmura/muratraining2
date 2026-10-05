@@ -98,6 +98,8 @@ Como nas fases anteriores, a lógica fica em `domain/` como funções puras com 
 export interface ImportSummary { days: number; exercises: number; sets: number }
 export function parseWorkoutText(text: string): Day[]
 export function importSummary(days: Day[]): ImportSummary
+/** Séries iguais e seguidas, para a prévia mostrar "3× 8-12". */
+export function setGroups(sets: ExerciseSet[]): { count: number; repsGoal: string; load: string; rir: string }[]
 
 // src/domain/theme.ts
 export interface Theme { bg: string; panel: string; panelAlt: string; line: string;
@@ -179,7 +181,8 @@ Novos:
 
 - `src/domain/workout-import.ts` e `workout-import.test.ts`
 - `src/domain/theme.ts` e `theme.test.ts`
-- `src/ui/theme.ts`, `src/ui/install.ts`
+- `src/data/theme-repo.ts` (ler o publicado e publicar)
+- `src/ui/theme.ts`, `src/ui/install.ts` e `install.test.ts`
 - `src/ui/views/import.ts`, `src/ui/views/theme.ts`
 - `src/ui/components/install-banner.ts`
 - `src/ui/handlers/import.ts`, `src/ui/handlers/theme.ts`
@@ -200,7 +203,8 @@ Nenhuma dependência nova.
   Mobilidade"); placa sem virar repetição; sobra virando nota por série; músculo
   adivinhado; resumo.
 - `theme`: documento vazio, `null`, cor inválida, fonte desconhecida, tema completo.
-- Banner, tela de tema e prévia da importação: checklist manual em produção.
+- `install`: a decisão de qual banner mostrar (`installKindFor`), sem tocar em `window`.
+- Banner na tela, tela de tema e prévia da importação: checklist manual em produção.
 
 ## Riscos
 
