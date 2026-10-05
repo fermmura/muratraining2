@@ -1,10 +1,12 @@
-import type { Client, HistoryEntry } from "@/data/schema";
+import type { Client, Day, HistoryEntry } from "@/data/schema";
 import type { Session } from "@/auth/session";
 
 export type View = "loading" | "gate" | "trainer" | "student";
 
 /** Tela aberta dentro da área do aluno. `home` é a grade de treinos da fase 1. */
-export type Screen = "home" | "calendar" | "pastWeek" | "progression" | "cardio" | "feedback" | "muscle";
+export type Screen =
+  | "home" | "calendar" | "pastWeek" | "progression" | "cardio" | "feedback" | "muscle"
+  | "import";
 
 /**
  * Onde a edição de treino grava. A mesma tela serve ao treino corrente e ao
@@ -43,6 +45,11 @@ export interface AppState {
   photoViewer: string | null;
   /** Há uma versão nova do app esperando para ser aplicada. */
   updateReady: boolean;
+  /** Texto colado na importação, guardado para voltar da prévia e corrigir. */
+  importText: string;
+  /** O que o texto virou; null enquanto não foi lido. */
+  importPreview: Day[] | null;
+  importError: string | null;
 }
 
 const INITIAL: AppState = {
@@ -66,6 +73,9 @@ const INITIAL: AppState = {
   photos: new Map<string, string | null>(),
   photoViewer: null,
   updateReady: false,
+  importText: "",
+  importPreview: null,
+  importError: null,
 };
 
 let state: AppState = { ...INITIAL };

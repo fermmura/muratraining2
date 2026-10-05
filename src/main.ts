@@ -1,6 +1,7 @@
 import "./ui/styles.css";
 import "./ui/styles-cardio-feedback.css";
 import "./ui/styles-muscle-photo.css";
+import "./ui/styles-import-theme.css";
 import { renderApp } from "./ui/render";
 import { startPwa } from "./pwa";
 import { getState, setState } from "./ui/state";

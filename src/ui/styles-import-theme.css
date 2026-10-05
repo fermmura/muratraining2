@@ -1,0 +1,15 @@
+/* importar treino */
+.import-hint { margin-bottom: 12px; line-height: 1.5; }
+.import-text { width: 100%; min-height: 240px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px; font-size: 13px; color: var(--chalk); resize: vertical; font-family: monospace; line-height: 1.4; }
+.import-error { color: var(--red); font-size: 13px; margin-top: 8px; }
+.import-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.import-back { justify-content: center; }
+.import-day { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; }
+.import-day h3 { font-size: 18px; margin-bottom: 6px; }
+.import-ex { padding: 8px 0; border-top: 1px solid var(--line); }
+.import-ex:first-of-type { border-top: none; }
+.import-ex-name { font-weight: 600; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.import-ex-muscle { font-size: 12px; color: var(--muted); font-weight: 400; }
+.import-sets { font-size: 13px; color: var(--plate); margin-top: 2px; }
+.import-notes { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.4; }

@@ -9,6 +9,7 @@ import { progressionView } from "./views/progression";
 import { cardioView } from "./views/cardio";
 import { feedbackView } from "./views/feedback";
 import { muscleVolumeView } from "./views/muscle-volume";
+import { importView } from "./views/import";
 import { muscleVolume } from "@/domain/muscle";
 import { dayView } from "./components/day";
 import { errorBanner } from "./components/error-banner";
@@ -65,6 +66,10 @@ function screenTemplate(client: Client, editable: boolean): TemplateResult | nul
     return muscleVolumeView(muscleVolume(handlers.editableDays(client)), handlers.screens.onCloseMuscle);
   }
 
+  if (s.screen === "import" && editable) {
+    return importView(s.importText, s.importPreview, s.importError, handlers.importer);
+  }
+
   return null;
 }
 
@@ -107,6 +112,11 @@ function homeTemplate(client: Client, editable: boolean): TemplateResult {
       ${editable
         ? html`<button class="dashed-btn" @click=${handlers.screens.onOpenMuscle}>
             <i class="ti ti-chart-donut-3"></i> Volume muscular
+          </button>`
+        : null}
+      ${editable && !plan
+        ? html`<button class="dashed-btn" @click=${handlers.importer.onOpen}>
+            <i class="ti ti-clipboard-text"></i> Importar treino
           </button>`
         : null}
       <button class="dashed-btn" @click=${handlers.feedback.onOpen}>
