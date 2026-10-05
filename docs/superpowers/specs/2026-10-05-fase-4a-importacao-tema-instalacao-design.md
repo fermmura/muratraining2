@@ -171,8 +171,9 @@ já existe em `styles.css`.
 Em `src/ui/state.ts`:
 
 - telas novas `import` e `theme`;
-- `importText: string` e `importPreview: Day[] | null`;
-- `themeDraft: Theme | null`;
+- `importText: string`, `importPreview: Day[] | null` e `importError: string | null`;
+- `theme: Theme` (o publicado), `themeDraft: Theme | null` e
+  `themeStatus: "idle" | "saving" | "saved" | "error"`;
 - `installKind: "android" | "ios" | null`.
 
 ### Arquivos
