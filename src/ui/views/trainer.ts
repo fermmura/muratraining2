@@ -6,6 +6,7 @@ export interface TrainerHandlers {
   onInvite: (name: string, email: string) => void;
   onResendSetup: (email: string) => void;
   onLogout: () => void;
+  onOpenTheme: () => void;
 }
 
 export function trainerView(
@@ -18,7 +19,12 @@ export function trainerView(
   return html`
     <div class="topbar">
       <span class="name display">Alunos</span>
-      <button class="logout" @click=${h.onLogout}>Sair</button>
+      <div class="topbar-actions">
+        <button class="icon-btn" aria-label="Personalizar visual" @click=${h.onOpenTheme}>
+          <i class="ti ti-palette"></i>
+        </button>
+        <button class="logout" @click=${h.onLogout}>Sair</button>
+      </div>
     </div>
 
     <div class="layout">

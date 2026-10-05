@@ -10,6 +10,7 @@ import { cardioView } from "./views/cardio";
 import { feedbackView } from "./views/feedback";
 import { muscleVolumeView } from "./views/muscle-volume";
 import { importView } from "./views/import";
+import { themeView } from "./views/theme";
 import { muscleVolume } from "@/domain/muscle";
 import { dayView } from "./components/day";
 import { errorBanner } from "./components/error-banner";
@@ -140,8 +141,12 @@ function viewTemplate() {
       return gateView(s.error, handlers.gate);
     case "trainer": {
       const client = s.clients.find((c) => c.id === s.selectedClientId) ?? null;
-      const body = client ? screenTemplate(client, true) ?? homeTemplate(client, true) : null;
-      return trainerView(s.clients, s.selectedClientId, body, s.error, handlers.trainer);
+      // a personalização vale para todos os alunos: abre com ou sem aluno escolhido
+      const body = s.screen === "theme" && s.themeDraft
+        ? themeView(s.themeDraft, s.themeStatus, handlers.theme)
+        : client ? screenTemplate(client, true) ?? homeTemplate(client, true) : null;
+      return trainerView(s.clients, s.selectedClientId, body, s.error,
+        { ...handlers.trainer, onOpenTheme: handlers.theme.onOpen });
     }
     case "student": {
       if (!s.client) return nothing;

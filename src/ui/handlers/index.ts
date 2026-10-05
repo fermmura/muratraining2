@@ -7,3 +7,4 @@ export { feedback, me } from "./feedback";
 export { editableDays } from "./target";
 export { photos, copyPlanPhotos, forgetPhoto } from "./photos";
 export { importer } from "./import";
+export { theme } from "./theme";

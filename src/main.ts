@@ -4,6 +4,8 @@ import "./ui/styles-muscle-photo.css";
 import "./ui/styles-import-theme.css";
 import { renderApp } from "./ui/render";
 import { startPwa } from "./pwa";
+import { startThemeSync } from "./ui/theme";
+import { loadPublishedTheme } from "./data/theme-repo";
 import { getState, setState } from "./ui/state";
 import { watchSession } from "./auth/session";
 import { subscribeToAllClients, subscribeToClient, saveClient } from "./data/client-repo";
@@ -39,6 +41,11 @@ watchSession((session) => {
   }
 
   setState({ session, error: null });
+
+  // uma leitura por abertura, sem listener: quem já está com o app aberto pega
+  // o tema novo na próxima vez. A regra só deixa ler depois do login. Sem
+  // documento ou sem rede, fica o padrão, sem aviso.
+  loadPublishedTheme().then((theme) => setState({ theme }), () => {});
 
   if (session.isTrainer) {
     unsubscribeData = subscribeToAllClients(
@@ -76,4 +83,5 @@ watchSession((session) => {
 });
 
 startPwa();
+startThemeSync();
 renderApp();

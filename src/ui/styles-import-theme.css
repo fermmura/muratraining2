@@ -13,3 +13,17 @@
 .import-ex-muscle { font-size: 12px; color: var(--muted); font-weight: 400; }
 .import-sets { font-size: 13px; color: var(--plate); margin-top: 2px; }
 .import-notes { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+
+/* personalização (as linhas .theme-row já estão em styles.css) */
+.theme-panel { max-width: 420px; }
+.theme-intro { margin-bottom: 6px; line-height: 1.5; }
+.theme-section { text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: .05em; color: var(--muted); margin: 16px 0 0; }
+.theme-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+.theme-actions .dashed-btn { justify-content: center; }
+.theme-actions .cta:disabled { opacity: .6; }
+.theme-danger { color: var(--red); border-color: var(--red); }
+.theme-status { font-size: 13px; color: var(--muted); text-align: center; }
+
+/* topo do treinador */
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.icon-btn { color: var(--muted); font-size: 18px; padding: 6px; }

@@ -1,12 +1,18 @@
 import type { Client, Day, HistoryEntry } from "@/data/schema";
 import type { Session } from "@/auth/session";
+import { DEFAULT_THEME, type Theme } from "@/domain/theme";
 
 export type View = "loading" | "gate" | "trainer" | "student";
 
-/** Tela aberta dentro da área do aluno. `home` é a grade de treinos da fase 1. */
+/**
+ * Tela aberta dentro da área do aluno. `home` é a grade de treinos da fase 1.
+ * `theme` é do treinador e não depende de aluno selecionado.
+ */
 export type Screen =
   | "home" | "calendar" | "pastWeek" | "progression" | "cardio" | "feedback" | "muscle"
-  | "import";
+  | "import" | "theme";
+
+export type ThemeStatus = "idle" | "saving" | "saved" | "error";
 
 /**
  * Onde a edição de treino grava. A mesma tela serve ao treino corrente e ao
@@ -50,6 +56,11 @@ export interface AppState {
   /** O que o texto virou; null enquanto não foi lido. */
   importPreview: Day[] | null;
   importError: string | null;
+  /** O tema publicado, aplicado em toda tela fora da personalização. */
+  theme: Theme;
+  /** O que o treinador está mexendo na personalização; só vale nessa tela. */
+  themeDraft: Theme | null;
+  themeStatus: ThemeStatus;
 }
 
 const INITIAL: AppState = {
@@ -76,6 +87,9 @@ const INITIAL: AppState = {
   importText: "",
   importPreview: null,
   importError: null,
+  theme: DEFAULT_THEME,
+  themeDraft: null,
+  themeStatus: "idle",
 };
 
 let state: AppState = { ...INITIAL };
