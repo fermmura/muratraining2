@@ -33,7 +33,8 @@ export function startThemeSync(): void {
   let applied: Theme | null = null;
   const sync = () => {
     const s = getState();
-    const t = s.screen === "theme" && s.themeDraft ? s.themeDraft : s.theme;
+    // o rascunho é do treinador: fora da tela dele, nunca aparece
+    const t = s.view === "trainer" && s.screen === "theme" && s.themeDraft ? s.themeDraft : s.theme;
     if (t === applied) return;
     applied = t;
     applyTheme(t);

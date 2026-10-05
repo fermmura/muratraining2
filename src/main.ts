@@ -36,7 +36,7 @@ watchSession((session) => {
   unsubscribeData = null;
 
   if (!session) {
-    setState({ view: "gate", session: null, client: null, clients: [], activeDayId: null });
+    setState({ view: "gate", session: null, client: null, clients: [], activeDayId: null, screen: "home", themeDraft: null });
     return;
   }
 
