@@ -5,6 +5,7 @@ import "./ui/styles-import-theme.css";
 import { renderApp } from "./ui/render";
 import { startPwa } from "./pwa";
 import { startThemeSync } from "./ui/theme";
+import { startInstall } from "./ui/install";
 import { loadPublishedTheme } from "./data/theme-repo";
 import { getState, setState } from "./ui/state";
 import { watchSession } from "./auth/session";
@@ -84,4 +85,5 @@ watchSession((session) => {
 
 startPwa();
 startThemeSync();
+startInstall();
 renderApp();

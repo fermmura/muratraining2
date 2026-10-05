@@ -12,6 +12,9 @@ export type Screen =
   | "home" | "calendar" | "pastWeek" | "progression" | "cardio" | "feedback" | "muscle"
   | "import" | "theme";
 
+/** Que banner de instalação mostrar; null quando nenhum cabe. */
+export type InstallKind = "android" | "ios" | null;
+
 export type ThemeStatus = "idle" | "saving" | "saved" | "error";
 
 /**
@@ -61,6 +64,7 @@ export interface AppState {
   /** O que o treinador está mexendo na personalização; só vale nessa tela. */
   themeDraft: Theme | null;
   themeStatus: ThemeStatus;
+  installKind: InstallKind;
 }
 
 const INITIAL: AppState = {
@@ -90,6 +94,7 @@ const INITIAL: AppState = {
   theme: DEFAULT_THEME,
   themeDraft: null,
   themeStatus: "idle",
+  installKind: null,
 };
 
 let state: AppState = { ...INITIAL };

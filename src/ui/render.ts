@@ -16,7 +16,9 @@ import { dayView } from "./components/day";
 import { errorBanner } from "./components/error-banner";
 import { photoViewer } from "./components/photo-viewer";
 import { updateBanner } from "./components/update-banner";
+import { installBanner } from "./components/install-banner";
 import { applyUpdate } from "@/pwa";
+import { promptInstall, dismissInstall } from "./install";
 import { weekRangeLabel, todayKey, weekKeyOf } from "@/domain/week";
 import { isWeekOutOfSync } from "@/domain/calendar";
 import * as handlers from "./handlers";
@@ -168,6 +170,8 @@ function template() {
     ${updateBanner(s.updateReady, applyUpdate)}
     ${viewTemplate()}
     ${photoViewer(s.photoViewer, handlers.photos.onClosePhoto)}
+    <!-- com as duas valendo, só a de versão nova: é a mais urgente -->
+    ${s.updateReady ? null : installBanner(s.installKind, () => void promptInstall(), dismissInstall)}
   `;
 }
 
