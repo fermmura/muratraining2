@@ -10,7 +10,7 @@ import { cardioView } from "./views/cardio";
 import { feedbackView } from "./views/feedback";
 import { muscleVolumeView } from "./views/muscle-volume";
 import { importView } from "./views/import";
-import { themeView } from "./views/theme";
+import { themeView, themeLoadingView } from "./views/theme";
 import { muscleVolume } from "@/domain/muscle";
 import { dayView } from "./components/day";
 import { errorBanner } from "./components/error-banner";
@@ -144,8 +144,10 @@ function viewTemplate() {
     case "trainer": {
       const client = s.clients.find((c) => c.id === s.selectedClientId) ?? null;
       // a personalização vale para todos os alunos: abre com ou sem aluno escolhido
-      const body = s.screen === "theme" && s.themeDraft
-        ? themeView(s.themeDraft, s.themeStatus, handlers.theme)
+      const body = s.screen === "theme"
+        ? (s.themeDraft
+          ? themeView(s.themeDraft, s.themeStatus, handlers.theme)
+          : themeLoadingView(s.themeStatus === "loadError", handlers.theme.onClose))
         : client ? screenTemplate(client, true) ?? homeTemplate(client, true) : null;
       return trainerView(s.clients, s.selectedClientId, body, s.error,
         { ...handlers.trainer, onOpenTheme: handlers.theme.onOpen });
@@ -169,9 +171,9 @@ function template() {
   return html`
     ${updateBanner(s.updateReady, applyUpdate)}
     ${viewTemplate()}
-    ${photoViewer(s.photoViewer, handlers.photos.onClosePhoto)}
-    <!-- com as duas valendo, só a de versão nova: é a mais urgente -->
+    <!-- com as duas valendo, só a de versão nova: é a mais urgente; antes da foto, que cobre tudo -->
     ${s.updateReady ? null : installBanner(s.installKind, () => void promptInstall(), dismissInstall)}
+    ${photoViewer(s.photoViewer, handlers.photos.onClosePhoto)}
   `;
 }
 

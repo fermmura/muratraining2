@@ -1,5 +1,5 @@
 import { getState, setState } from "../state";
-import { publishTheme } from "@/data/theme-repo";
+import { loadPublishedTheme, publishTheme } from "@/data/theme-repo";
 import { DEFAULT_THEME, type ColorKey, type Theme } from "@/domain/theme";
 import { resetScreen } from "./trainer";
 
@@ -14,15 +14,28 @@ async function publish(t: Theme): Promise<void> {
   setState({ themeStatus: "saving" });
   try {
     await publishTheme(t);
-    setState({ theme: t, themeStatus: "saved" });
+    // só diz "publicado" se ninguém mexeu de novo enquanto gravava
+    setState({ theme: t, themeStatus: getState().themeDraft === t ? "saved" : "idle" });
   } catch {
     setState({ themeStatus: "error" });
   }
 }
 
 export const theme = {
-  // o rascunho parte sempre do publicado: não há modo prévia guardado entre sessões
-  onOpen: () => setState({ screen: "theme", activeDayId: null, themeDraft: getState().theme, themeStatus: "idle" }),
+  // relê o publicado ao abrir: o rascunho nunca parte de um tema que ainda não
+  // chegou, senão publicar trocaria o visual de todos os alunos pelo padrão
+  onOpen: () => {
+    setState({ screen: "theme", activeDayId: null, themeDraft: null, themeStatus: "loading" });
+    loadPublishedTheme().then(
+      (t) => {
+        const s = getState();
+        if (s.screen === "theme" && !s.themeDraft) setState({ theme: t, themeDraft: t, themeStatus: "idle" });
+      },
+      () => {
+        if (getState().screen === "theme") setState({ themeStatus: "loadError" });
+      },
+    );
+  },
   onColor: (key: ColorKey, value: string) => edit({ [key]: value }),
   onFont: (key: FontKey, value: string) => edit({ [key]: value }),
 
@@ -34,6 +47,7 @@ export const theme = {
   onDiscard: () => setState({ themeDraft: getState().theme, themeStatus: "idle" }),
 
   onReset: () => {
+    if (getState().themeStatus === "saving") return;
     if (!confirm("Voltar ao visual padrão? Vale na hora para todos os alunos.")) return;
     setState({ themeDraft: DEFAULT_THEME });
     void publish(DEFAULT_THEME);

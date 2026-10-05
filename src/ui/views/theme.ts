@@ -16,6 +16,8 @@ const STATUS: Record<ThemeStatus, string> = {
   saving: "Publicando…",
   saved: "Publicado para os alunos.",
   error: "Não foi possível publicar. Tente de novo.",
+  loading: "",
+  loadError: "",
 };
 
 function fontRow(
@@ -64,5 +66,20 @@ export function themeView(draft: Theme, status: ThemeStatus, h: ThemeHandlers): 
         </button>
       </div>
     </div>
+  `;
+}
+
+/** Enquanto o tema publicado não chega, ou quando a leitura falhou. */
+export function themeLoadingView(failed: boolean, onClose: () => void): TemplateResult {
+  return html`
+    <div class="day-head">
+      <button class="back" @click=${onClose}><i class="ti ti-arrow-left"></i></button>
+      <span class="day-title display">Personalização</span>
+    </div>
+    <p class="muted-note">
+      ${failed
+        ? "Não foi possível carregar o visual publicado. Volte e abra de novo quando tiver conexão."
+        : "Carregando o visual publicado…"}
+    </p>
   `;
 }

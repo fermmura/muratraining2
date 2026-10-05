@@ -15,7 +15,7 @@ export type Screen =
 /** Que banner de instalação mostrar; null quando nenhum cabe. */
 export type InstallKind = "android" | "ios" | null;
 
-export type ThemeStatus = "idle" | "saving" | "saved" | "error";
+export type ThemeStatus = "idle" | "saving" | "saved" | "error" | "loading" | "loadError";
 
 /**
  * Onde a edição de treino grava. A mesma tela serve ao treino corrente e ao
